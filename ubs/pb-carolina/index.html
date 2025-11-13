@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>PegaSenha • UBS Carolina Ramos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="card">
+    <h1>Pega<span style="color:#2563eb;">Senha</span></h1>
+    <p class="subtitle">
+      UBS Carolina Ramos · Balneário Perequê · Porto Belo – SC
+    </p>
+
+    <p>
+      Use esta tela apenas quando estiver na <strong>UBS Carolina Ramos</strong>.
+      Em breve, esta página estará conectada ao sistema de fila em tempo real.
+    </p>
+
+    <form class="form" onsubmit="handleSubmit(event)">
+      <h2>Gerar minha senha</h2>
+
+      <div class="field">
+        <label for="nome">Nome completo</label>
+        <input id="nome" name="nome" type="text" required placeholder="Digite seu nome completo">
+      </div>
+
+      <div class="field">
+        <label for="nascimento">Data de nascimento</label>
+        <input id="nascimento" name="nascimento" type="date" required>
+      </div>
+
+      <div class="field">
+        <label for="telefone">Telefone celular</label>
+        <input id="telefone" name="telefone" type="tel" required placeholder="(00) 00000-0000">
+      </div>
+
+      <div class="field">
+        <label for="servico">Serviço desejado</label>
+        <select id="servico" name="servico" required>
+          <option value="">Selecione...</option>
+          <option value="medico">Atendimento médico</option>
+          <option value="enfermagem">Enfermagem</option>
+          <option value="farmacia">Farmácia</option>
+          <option value="curativos">Curativos</option>
+          <option value="vacinacao">Vacinação</option>
+        </select>
+      </div>
+
+      <div class="field checkbox">
+        <label>
+          <input type="checkbox" required>
+          Confirmo que estou nesta unidade e concordo com o uso dos meus dados para organização da fila.
+        </label>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn">Gerar minha senha</button>
+      </div>
+    </form>
+
+    <hr class="divider">
+
+    <section class="solidaria">
+      <h2>Gerar senha para outra pessoa (sem celular)</h2>
+      <p class="muted">
+        Este recurso é destinado a situações em que o paciente não possui celular
+        ou está sem bateria. A pessoa que ajuda será registrada como responsável
+        solidária pela emissão da senha.
+      </p>
+
+      <a class="btn" href="#" onclick="alert('Em breve esta função estará ativa nesta unidade.'); return false;">
+        Gerar senha solidária
+      </a>
+    </section>
+
+    <p class="muted" style="margin-top:24px;">
+      As senhas desta unidade são apagadas diariamente às 18h.
+    </p>
+
+    <p class="muted">
+      <a href="/">↩ Voltar para a página inicial do PegaSenha</a>
+    </p>
+  </main>
+
+  <script>
+    function handleSubmit(event) {
+      event.preventDefault();
+      // Aqui depois vamos chamar a API (Railway) com geolocalização.
+      alert("Em breve esta unidade estará gerando senhas em tempo real pelo PegaSenha.");
+    }
+  </script>
+</body>
+</html>

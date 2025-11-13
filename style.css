@@ -84,3 +84,168 @@ h1 { margin:0 0 8px; }
   margin-top:0;
   margin-bottom:8px;
 }
+.card-wide {
+  max-width: 960px;
+}
+
+.topbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:16px;
+}
+.top-title {
+  margin:0;
+}
+.brand-accent {
+  color:#2563eb;
+}
+.top-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:flex-end;
+}
+.pill {
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#eff6ff;
+  font-size:0.85rem;
+  color:#1e40af;
+}
+
+.layout {
+  display:grid;
+  grid-template-columns: minmax(0,2fr) minmax(0,1fr);
+  gap:16px;
+}
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.layout-main h2,
+.layout-side h3 {
+  margin-top:0;
+}
+
+.fila-table-wrapper {
+  max-height:320px;
+  overflow:auto;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
+}
+.fila-table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:0.9rem;
+}
+.fila-table th,
+.fila-table td {
+  padding:8px 10px;
+  text-align:left;
+}
+.fila-table thead {
+  background:#f9fafb;
+  position:sticky;
+  top:0;
+}
+.fila-table tbody tr:nth-child(even) {
+  background:#f9fafb;
+}
+
+.fila-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+}
+
+.badge {
+  display:inline-flex;
+  align-items:center;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:0.75rem;
+  background:#e5e7eb;
+}
+.badge-pref {
+  background:#f5e7ff;
+  color:#6b21a8;
+}
+
+/* estados da fila (por enquanto só estilização leve) */
+.status-chamada {
+  background:#eff6ff;
+}
+.status-atendida {
+  opacity:0.5;
+}
+.status-ausente {
+  background:#fef2f2;
+}
+
+.btn-secondary {
+  border-radius:999px;
+  padding:8px 14px;
+  border:1px solid #d1d5db;
+  background:#fff;
+  font-size:0.85rem;
+}
+.btn-secondary:active {
+  transform:scale(0.98);
+}
+
+.btn-mini {
+  border-radius:999px;
+  padding:4px 8px;
+  border:none;
+  font-size:0.75rem;
+  background:#e5e7eb;
+}
+.btn-mini:active {
+  transform:scale(0.97);
+}
+.btn-danger {
+  background:#fee2e2;
+}
+
+.actions-row {
+  margin-top:12px;
+  text-align:center;
+}
+
+.layout-side {
+  border-left:1px solid #e5e7eb;
+  padding-left:12px;
+}
+@media (max-width: 768px) {
+  .layout-side {
+    border-left:none;
+    padding-left:0;
+    border-top:1px solid #e5e7eb;
+    padding-top:12px;
+  }
+}
+
+.calls-list,
+.stats-list {
+  list-style:none;
+  padding-left:0;
+  margin:8px 0 16px;
+}
+.calls-list li,
+.stats-list li {
+  font-size:0.85rem;
+  margin-bottom:4px;
+}
+.stats-list li span {
+  color:#6b7280;
+  margin-right:4px;
+}
+.small {
+  font-size:0.8rem;
+}

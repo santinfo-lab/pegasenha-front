@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>PegaSenha • Atendente · UBS Carolina Ramos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="card card-wide">
+    <header class="topbar">
+      <div>
+        <h1 class="top-title">
+          Pega<span class="brand-accent">Senha</span>
+        </h1>
+        <p class="subtitle">
+          Painel do atendente · UBS Carolina Ramos
+        </p>
+      </div>
+      <div class="top-actions">
+        <span class="pill">Operador: <strong>Atendente</strong></span>
+        <button class="btn-secondary" type="button" onclick="alert('No futuro aqui abre as configurações da unidade.');">
+          Configurações
+        </button>
+      </div>
+    </header>
+
+    <section class="layout">
+      <!-- Coluna esquerda: fila atual -->
+      <section class="layout-main">
+        <h2>Fila atual</h2>
+
+        <div class="fila-table-wrapper">
+          <table class="fila-table">
+            <thead>
+              <tr>
+                <th>Nº</th>
+                <th>Tipo</th>
+                <th>Serviço</th>
+                <th>Espera</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="fila-body">
+              <!-- Linhas serão montadas via JS por enquanto com dados fictícios -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="actions-row">
+          <button class="btn" type="button" onclick="handleChamarProximo()">
+            Chamar próximo
+          </button>
+        </div>
+      </section>
+
+      <!-- Coluna direita: últimas chamadas / resumo -->
+      <aside class="layout-side">
+        <h3>Últimas chamadas</h3>
+        <ul id="ultimas-chamadas" class="calls-list">
+          <!-- Preenchido via JS com dados fictícios -->
+        </ul>
+
+        <h3>Resumo do dia</h3>
+        <ul class="stats-list">
+          <li><span>Total de senhas:</span> <strong id="stat-total">0</strong></li>
+          <li><span>Atendidas:</span> <strong id="stat-atendidas">0</strong></li>
+          <li><span>Ausentes:</span> <strong id="stat-ausentes">0</strong></li>
+        </ul>
+
+        <p class="muted small">
+          Esta tela é de uso exclusivo da equipe da unidade.
+          No futuro ela será conectada à API em tempo real.
+        </p>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    // Dados fictícios por enquanto. Depois isso virá da API.
+    let fila = [
+      { id: "t1", numero: 42, tipo: "preferencial", tipo_preferencial: "idoso", servico: "Médico", espera: "12 min", status: "aguardando" },
+      { id: "t2", numero: 43, tipo: "normal", servico: "Enfermagem", espera: "9 min", status: "aguardando" },
+      { id: "t3", numero: 44, tipo: "normal", servico: "Farmácia", espera: "7 min", status: "aguardando" },
+      { id: "t4", numero: 45, tipo: "preferencial", tipo_preferencial: "gestante", servico: "Médico", espera: "5 min", status: "aguardando" }
+    ];
+
+    let ultimasChamadas = [];
+    let stats = {
+      total: fila.length,
+      atendidas: 0,
+      ausentes: 0
+    };
+
+    function renderFila() {
+      const tbody = document.getElementById("fila-body");
+      tbody.innerHTML = "";
+
+      fila.forEach((item) => {
+        const tr = document.createElement("tr");
+        tr.className = "status-" + item.status;
+
+        const tipoLabel = item.tipo === "preferencial"
+          ? 'Pref. ' + (item.tipo_preferencial ? '(' + item.tipo_preferencial + ')' : '')
+          : 'Normal';
+
+        tr.innerHTML = `
+          <td>${item.numero}</td>
+          <td>
+            <span class="badge ${item.tipo === "preferencial" ? "badge-pref" : ""}">
+              ${tipoLabel}
+            </span>
+          </td>
+          <td>${item.servico}</td>
+          <td>${item.espera}</td>
+          <td class="fila-actions">
+            <button type="button" class="btn-mini" onclick="handleChamarAgora('${item.id}')">
+              Chamar agora
+            </button>
+            <button type="button" class="btn-mini" onclick="handleAtendida('${item.id}')">
+              Atendida
+            </button>
+            <button type="button" class="btn-mini btn-danger" onclick="handleAusente('${item.id}')">
+              Ausente
+            </button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("stat-total").textContent = stats.total;
+      document.getElementById("stat-atendidas").textContent = stats.atendidas;
+      document.getElementById("stat-ausentes").textContent = stats.ausentes;
+      renderUltimasChamadas();
+    }
+
+    function renderUltimasChamadas() {
+      const ul = document.getElementById("ultimas-chamadas");
+      ul.innerHTML = "";
+
+      ultimasChamadas.slice(0, 5).forEach((c) => {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${c.numero}</strong> · ${c.servico} · ${c.hora}`;
+        ul.appendChild(li);
+      });
+    }
+
+    function nowTime() {
+      const d = new Date();
+      return d.toTimeString().slice(0, 5); // HH:MM
+    }
+
+    function handleChamarProximo() {
+      // Aqui depois a lógica virá da API (preferencial, ordem, etc.).
+      // Por enquanto só pega o primeiro da fila.
+      const proximo = fila.find(i => i.status === "aguardando");
+      if (!proximo) {
+        alert("Não há mais senhas aguardando.");
+        return;
+      }
+
+      proximo.status = "chamada";
+      ultimasChamadas.unshift({
+        numero: proximo.numero,
+        servico: proximo.servico,
+        hora: nowTime(),
+        tipo: "automatico"
+      });
+
+      alert("Chamando senha " + proximo.numero + " (" + proximo.servico + ")");
+      renderFila();
+    }
+
+    function handleChamarAgora(id) {
+      const item = fila.find(i => i.id === id);
+      if (!item) return;
+
+      const motivo = prompt(
+        "Informe o motivo para chamar esta senha fora da ordem (ex.: emergência, pedido pronto, critério profissional):"
+      );
+
+      if (!motivo) {
+        alert("Motivo é obrigatório para chamada fora de ordem.");
+        return;
+      }
+
+      item.status = "chamada";
+      ultimasChamadas.unshift({
+        numero: item.numero,
+        servico: item.servico,
+        hora: nowTime(),
+        tipo: "forcada",
+        motivo
+      });
+
+      alert("Chamando (fora da ordem) senha " + item.numero + ". Motivo: " + motivo);
+      renderFila();
+    }
+
+    function handleAtendida(id) {
+      const item = fila.find(i => i.id === id);
+      if (!item) return;
+
+      item.status = "atendida";
+      stats.atendidas++;
+      renderFila();
+    }
+
+    function handleAusente(id) {
+      const item = fila.find(i => i.id === id);
+      if (!item) return;
+
+      item.status = "ausente";
+      stats.ausentes++;
+      renderFila();
+    }
+
+    // primeira renderização
+    renderFila();
+  </script>
+</body>
+</html>

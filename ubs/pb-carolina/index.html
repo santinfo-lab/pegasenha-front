@@ -27,11 +27,6 @@
       </div>
 
       <div class="field">
-        <label for="nascimento">Data de nascimento</label>
-        <input id="nascimento" name="nascimento" type="date" required>
-      </div>
-
-      <div class="field">
         <label for="telefone">Telefone celular</label>
         <input id="telefone" name="telefone" type="tel" required placeholder="(00) 00000-0000">
       </div>
@@ -87,7 +82,7 @@
   <script>
     function handleSubmit(event) {
       event.preventDefault();
-      // Aqui depois vamos chamar a API (Railway) com geolocalização.
+      // Depois aqui vamos enviar nome, telefone e serviço para a API (Railway)
       alert("Em breve esta unidade estará gerando senhas em tempo real pelo PegaSenha.");
     }
   </script>

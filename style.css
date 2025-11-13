@@ -32,3 +32,55 @@ h1 { margin:0 0 8px; }
 }
 .btn:active { transform:scale(0.98); }
 .muted { font-size:0.85rem; color:#6b7280; }
+.form {
+  margin-top:16px;
+  margin-bottom:24px;
+}
+.field {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  margin-bottom:12px;
+}
+.field label {
+  font-size:0.9rem;
+  font-weight:500;
+}
+.field input,
+.field select {
+  padding:10px 12px;
+  border-radius:999px;
+  border:1px solid #d1d5db;
+  font-size:0.95rem;
+}
+.field input:focus,
+.field select:focus {
+  outline:none;
+  border-color:#2563eb;
+}
+.field.checkbox {
+  flex-direction:row;
+}
+.field.checkbox label {
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  font-size:0.85rem;
+  font-weight:400;
+}
+.field.checkbox input {
+  margin-top:3px;
+  border-radius:4px;
+}
+.actions {
+  margin-top:8px;
+}
+.divider {
+  border:none;
+  border-top:1px solid #e5e7eb;
+  margin:24px 0;
+}
+.solidaria h2 {
+  margin-top:0;
+  margin-bottom:8px;
+}

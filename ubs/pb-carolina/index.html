@@ -5,31 +5,44 @@
   <title>PegaSenha • UBS Carolina Ramos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/style.css">
+  <style>
+    .titulo-centralizado { text-align:center; margin-bottom:8px; }
+    .texto-inicial { text-align:center; font-size:1.05rem; margin-bottom:10px; }
+    .alert-red { color:#b91c1c; font-weight:bold; }
+    .btn-grande { padding:14px 26px; font-size:1.1rem; border-radius:12px; }
+  </style>
 </head>
 <body>
   <main class="card">
-    <header style="margin-bottom: 16px;">
-      <h1 class="top-title">
+
+    <!-- CABEÇALHO -->
+    <header style="margin-bottom: 20px;">
+      <h1 class="top-title titulo-centralizado">
         Pega<span class="brand-accent">Senha</span>
       </h1>
-      <p class="subtitle">
-        UBS Carolina Ramos · Porto Belo (SC)
+
+      <p class="texto-inicial">
+        Este serviço organiza a fila de atendimento desta unidade.<br>
+        Aqui você gera sua senha.
       </p>
+
+      <!-- Texto removido conforme solicitado
       <p class="muted small">
         Este serviço organiza a fila de atendimento desta unidade.  
         Você gera sua senha aqui, aguarda nas proximidades da UBS e
         aguarda sua chamada pela equipe.
       </p>
+      -->
     </header>
 
-    <!-- BLOCO: FORMULÁRIO (ETAPA 1) -->
+    <!-- FORMULÁRIO -->
     <section id="form-section">
-      <h2>Gerar minha senha</h2>
-      <p class="muted small" style="margin-bottom: 12px;">
+      <p class="alert-red" style="text-align:center; margin-bottom:16px;">
         Preencha seus dados para entrar na fila desta unidade.
       </p>
 
       <form id="senha-form" class="form-layout">
+
         <label class="field">
           <span>Nome completo</span>
           <input id="nome" name="nome" type="text" required placeholder="Seu nome completo">
@@ -44,7 +57,6 @@
           <span>Serviço desejado</span>
           <select id="servico" name="servico" required>
             <option value="">Selecione um serviço</option>
-            <!-- Por enquanto serviços fixos; depois virão da API -->
             <option value="medico">Atendimento médico</option>
             <option value="enfermagem">Enfermagem</option>
             <option value="farmacia">Farmácia</option>
@@ -52,12 +64,13 @@
           </select>
         </label>
 
-        <!-- Preferencial (deixa pronto, mas simples) -->
+        <!-- Preferencial -->
         <fieldset class="field">
           <legend class="field-legend">Atendimento preferencial</legend>
+
           <label class="checkbox-line">
             <input type="checkbox" id="pref-checkbox">
-            <span>Preciso de atendimento preferencial (idoso, gestante, PCD, TEA, criança de colo, etc.)</span>
+            <span>Preciso de atendimento preferencial</span>
           </label>
 
           <label class="field" id="pref-tipo-wrapper" style="display:none; margin-top:8px;">
@@ -69,7 +82,7 @@
               <option value="pcd">Pessoa com deficiência</option>
               <option value="lactante">Lactante</option>
               <option value="crianca_colo">Pessoa com criança de colo</option>
-              <option value="tea">Pessoa com TEA (autismo)</option>
+              <option value="tea">Pessoa com TEA</option>
               <option value="outro">Outro motivo previsto em lei</option>
             </select>
           </label>
@@ -77,20 +90,24 @@
 
         <div id="form-erro" class="alert alert-error" style="display:none; margin-top:8px;"></div>
 
-        <div style="margin-top: 16px; text-align: center;">
-          <button id="btn-gerar" class="btn" type="submit">
-            Gerar minha senha
+        <!-- BOTÃO GERAR SENHA -->
+        <div style="margin-top: 20px; text-align:center;">
+          <button id="btn-gerar" class="btn btn-grande" type="submit">
+            GERAR SENHA
           </button>
         </div>
 
-        <p class="muted small" style="margin-top: 12px;">
-          Ao gerar sua senha, você confirma que está nas proximidades da UBS Carolina Ramos
-          e concorda em aguardar sua chamada pela equipe da unidade.
+        <p class="muted small" style="margin-top: 16px; text-align:center;">
+          <strong>
+            Ao gerar sua senha, você concorda que deve permanecer nas proximidades desta UBS 
+            e aguardar sua chamada pela equipe da unidade.
+          </strong>
         </p>
+
       </form>
     </section>
 
-    <!-- BLOCO: RESULTADO (ETAPA 2) -->
+    <!-- RESULTADO -->
     <section id="resultado-section" style="display:none;">
       <h2>Sua senha foi gerada</h2>
 
@@ -104,11 +121,7 @@
 
       <p class="muted small" style="margin-top: 12px;">
         Aguarde nas proximidades da UBS Carolina Ramos.  
-        Quando sua senha for chamada pela equipe, dirija-se ao atendimento.
-      </p>
-
-      <p class="muted small">
-        Se precisar, você pode gerar uma nova senha caso cometa algum erro nos dados.
+        Quando sua senha for chamada, dirija-se ao atendimento.
       </p>
 
       <div style="margin-top: 16px; text-align:center;">
@@ -118,13 +131,14 @@
       </div>
     </section>
 
-    <footer style="margin-top:24px;">
+    <footer style="margin-top:24px; text-align:center;">
       <p class="muted small">
-        PegaSenha é um sistema independente, disponibilizado gratuitamente para uso nesta unidade.
+        PegaSenha é um sistema independente, disponibilizado gratuitamente para esta unidade.
       </p>
     </footer>
   </main>
 
+  <!-- SCRIPT MANTIDO (MESMO COMPORTAMENTO) -->
   <script>
     const formEl = document.getElementById('senha-form');
     const formSection = document.getElementById('form-section');
@@ -140,12 +154,9 @@
     const ticketServicoEl = document.getElementById('ticket-servico');
     const ticketPosicaoEl = document.getElementById('ticket-posicao');
 
-    // mostra/esconde o motivo preferencial
     prefCheckbox.addEventListener('change', () => {
       prefTipoWrapper.style.display = prefCheckbox.checked ? 'block' : 'none';
-      if (!prefCheckbox.checked) {
-        prefTipoSelect.value = '';
-      }
+      if (!prefCheckbox.checked) prefTipoSelect.value = '';
     });
 
     formEl.addEventListener('submit', function (event) {
@@ -159,47 +170,35 @@
       const pref = prefCheckbox.checked;
       const prefTipo = pref ? prefTipoSelect.value : null;
 
-      // validação simples em front
       if (!nome || !telefone || !servico) {
-        mostrarErro('Preencha nome, telefone e serviço para gerar sua senha.');
-        return;
+        return mostrarErro('Preencha nome, telefone e serviço.');
       }
-
       if (pref && !prefTipo) {
-        mostrarErro('Selecione o motivo da prioridade de atendimento.');
-        return;
+        return mostrarErro('Selecione o motivo da prioridade.');
       }
 
-      // Desabilita botão e simula envio
       btnGerar.disabled = true;
-      btnGerar.textContent = 'Gerando sua senha...';
+      btnGerar.textContent = 'Gerando...';
 
-      // Aqui futuramente entra o fetch real para a API:
-      // fetch('/api/filas/pb-carolina/senha', { method:'POST', body: JSON.stringify(...) })
-
-      // Simulação de API (mock) por enquanto:
       setTimeout(() => {
-        const mockResposta = simularRespostaAPI({ nome, telefone, servico, pref, prefTipo });
+        const r = simularRespostaAPI({ nome, telefone, servico, pref, prefTipo });
 
-        if (mockResposta.erro) {
-          mostrarErro(mockResposta.mensagem || 'Não foi possível gerar sua senha.');
+        if (r.erro) {
+          mostrarErro(r.mensagem || 'Não foi possível gerar a senha.');
           btnGerar.disabled = false;
-          btnGerar.textContent = 'Gerar minha senha';
+          btnGerar.textContent = 'GERAR SENHA';
           return;
         }
 
-        // Preenche dados na área de resultado
-        ticketNumeroEl.textContent = mockResposta.senha;
-        ticketServicoEl.textContent = 'Serviço: ' + mockResposta.servico_nome;
-        ticketPosicaoEl.textContent = 'Posição na fila: ' + mockResposta.posicao + 'º';
+        ticketNumeroEl.textContent = r.senha;
+        ticketServicoEl.textContent = 'Serviço: ' + r.servico_nome;
+        ticketPosicaoEl.textContent = 'Posição na fila: ' + r.posicao + 'º';
 
-        // Mostra tela de resultado
         formSection.style.display = 'none';
         resultadoSection.style.display = 'block';
 
-        // Libera botão para próxima vez
         btnGerar.disabled = false;
-        btnGerar.textContent = 'Gerar minha senha';
+        btnGerar.textContent = 'GERAR SENHA';
       }, 800);
     });
 
@@ -213,28 +212,16 @@
       formSection.style.display = 'block';
     }
 
-    // Simulação de "API" local – depois será substituído pelo backend real
-    function simularRespostaAPI(dados) {
-      // Aqui poderíamos simular erros, mas por enquanto só sucesso simples.
-      // Gera um número de senha pseudo-aleatório e posição na fila.
-      const numeroBase = Math.floor(Date.now() / 1000) % 100; // só pra ter algo variando
-      const senha = (numeroBase < 10 ? '0' + numeroBase : '' + numeroBase);
-
-      const nomesServicos = {
-        medico: 'Atendimento médico',
-        enfermagem: 'Enfermagem',
-        farmacia: 'Farmácia',
-        outro: 'Outro atendimento na UBS'
+    function simularRespostaAPI(d) {
+      const numero = Math.floor(Date.now()/1000) % 100;
+      const senha = numero < 10 ? '0'+numero : ''+numero;
+      const nomes = {
+        medico:'Atendimento médico', enfermagem:'Enfermagem',
+        farmacia:'Farmácia', outro:'Outro atendimento'
       };
-
-      const posicao = Math.floor(Math.random() * 10) + 1; // 1 a 10 só pra simular
-
       return {
-        id: 'mock_' + Date.now(),
-        senha,
-        posicao,
-        servico_id: dados.servico,
-        servico_nome: nomesServicos[dados.servico] || 'Atendimento'
+        senha, posicao: Math.floor(Math.random()*10)+1,
+        servico_nome: nomes[d.servico]
       };
     }
   </script>

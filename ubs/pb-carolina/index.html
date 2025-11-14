@@ -8,7 +8,9 @@
 
   <!-- ESTILOS ESPECÍFICOS DA PÁGINA -->
   <style>
-    .titulo-centralizado { text-align:center; margin-bottom:8px; }
+    .titulo-centralizado { text-align:center; margin-bottom:6px; }
+    .subtitulo-ubs { text-align:center; font-size:0.98rem; margin-bottom:14px; color:#555; }
+
     .texto-inicial { text-align:center; font-size:1.05rem; margin-bottom:14px; }
     .alert-red { color:#b91c1c; font-weight:bold; }
 
@@ -17,12 +19,11 @@
       padding: 14px 30px;
       font-size: 1.1rem;
       border-radius: 12px;
-      display: block;      /* garante centralização */
-      margin: 0 auto;      /* centraliza */
+      display: block;
+      margin: 0 auto;
       text-align: center;
     }
 
-    /* Ajuste no card do ticket */
     .ticket-box {
       border: 2px solid #eee;
       padding: 20px;
@@ -47,6 +48,11 @@
       <h1 class="top-title titulo-centralizado">
         Pega<span class="brand-accent">Senha</span>
       </h1>
+
+      <!-- Nome da UBS — restaurado -->
+      <p class="subtitulo-ubs">
+        UBS Carolina Ramos · Porto Belo (SC)
+      </p>
 
       <p class="texto-inicial">
         Este serviço organiza a fila de atendimento desta unidade.<br>
@@ -200,7 +206,7 @@
       btnGerar.textContent = 'Gerando...';
 
       setTimeout(() => {
-        const r = simularRespostaAPI({ nome, telefone, servico, pref, prefTipo });
+        const r = simularRespostaAPI();
 
         if (r.erro) {
           mostrarErro(r.mensagem || 'Erro ao gerar senha.');

@@ -8,82 +8,234 @@
 </head>
 <body>
   <main class="card">
-    <h1>Pega<span style="color:#2563eb;">Senha</span></h1>
-    <p class="subtitle">
-      UBS Carolina Ramos · Balneário Perequê · Porto Belo – SC
-    </p>
+    <header style="margin-bottom: 16px;">
+      <h1 class="top-title">
+        Pega<span class="brand-accent">Senha</span>
+      </h1>
+      <p class="subtitle">
+        UBS Carolina Ramos · Porto Belo (SC)
+      </p>
+      <p class="muted small">
+        Este serviço organiza a fila de atendimento desta unidade.  
+        Você gera sua senha aqui, aguarda nas proximidades da UBS e
+        aguarda sua chamada pela equipe.
+      </p>
+    </header>
 
-    <p>
-      Use esta tela apenas quando estiver na <strong>UBS Carolina Ramos</strong>.
-      Em breve, esta página estará conectada ao sistema de fila em tempo real.
-    </p>
-
-    <form class="form" onsubmit="handleSubmit(event)">
+    <!-- BLOCO: FORMULÁRIO (ETAPA 1) -->
+    <section id="form-section">
       <h2>Gerar minha senha</h2>
-
-      <div class="field">
-        <label for="nome">Nome completo</label>
-        <input id="nome" name="nome" type="text" required placeholder="Digite seu nome completo">
-      </div>
-
-      <div class="field">
-        <label for="telefone">Telefone celular</label>
-        <input id="telefone" name="telefone" type="tel" required placeholder="(00) 00000-0000">
-      </div>
-
-      <div class="field">
-        <label for="servico">Serviço desejado</label>
-        <select id="servico" name="servico" required>
-          <option value="">Selecione...</option>
-          <option value="medico">Atendimento médico</option>
-          <option value="enfermagem">Enfermagem</option>
-          <option value="farmacia">Farmácia</option>
-          <option value="curativos">Curativos</option>
-          <option value="vacinacao">Vacinação</option>
-        </select>
-      </div>
-
-      <div class="field checkbox">
-        <label>
-          <input type="checkbox" required>
-          Confirmo que estou nesta unidade e concordo com o uso dos meus dados para organização da fila.
-        </label>
-      </div>
-
-      <div class="actions">
-        <button type="submit" class="btn">Gerar minha senha</button>
-      </div>
-    </form>
-
-    <hr class="divider">
-
-    <section class="solidaria">
-      <h2>Gerar senha para outra pessoa (sem celular)</h2>
-      <p class="muted">
-        Este recurso é destinado a situações em que o paciente não possui celular
-        ou está sem bateria. A pessoa que ajuda será registrada como responsável
-        solidária pela emissão da senha.
+      <p class="muted small" style="margin-bottom: 12px;">
+        Preencha seus dados para entrar na fila desta unidade.
       </p>
 
-      <a class="btn" href="#" onclick="alert('Em breve esta função estará ativa nesta unidade.'); return false;">
-        Gerar senha solidária
-      </a>
+      <form id="senha-form" class="form-layout">
+        <label class="field">
+          <span>Nome completo</span>
+          <input id="nome" name="nome" type="text" required placeholder="Seu nome completo">
+        </label>
+
+        <label class="field">
+          <span>Telefone (WhatsApp ou celular)</span>
+          <input id="telefone" name="telefone" type="tel" required placeholder="(47) 9 9999-9999">
+        </label>
+
+        <label class="field">
+          <span>Serviço desejado</span>
+          <select id="servico" name="servico" required>
+            <option value="">Selecione um serviço</option>
+            <!-- Por enquanto serviços fixos; depois virão da API -->
+            <option value="medico">Atendimento médico</option>
+            <option value="enfermagem">Enfermagem</option>
+            <option value="farmacia">Farmácia</option>
+            <option value="outro">Outro atendimento na UBS</option>
+          </select>
+        </label>
+
+        <!-- Preferencial (deixa pronto, mas simples) -->
+        <fieldset class="field">
+          <legend class="field-legend">Atendimento preferencial</legend>
+          <label class="checkbox-line">
+            <input type="checkbox" id="pref-checkbox">
+            <span>Preciso de atendimento preferencial (idoso, gestante, PCD, TEA, criança de colo, etc.)</span>
+          </label>
+
+          <label class="field" id="pref-tipo-wrapper" style="display:none; margin-top:8px;">
+            <span>Motivo da prioridade</span>
+            <select id="pref-tipo">
+              <option value="">Selecione uma opção</option>
+              <option value="idoso">Idoso (60+)</option>
+              <option value="gestante">Gestante</option>
+              <option value="pcd">Pessoa com deficiência</option>
+              <option value="lactante">Lactante</option>
+              <option value="crianca_colo">Pessoa com criança de colo</option>
+              <option value="tea">Pessoa com TEA (autismo)</option>
+              <option value="outro">Outro motivo previsto em lei</option>
+            </select>
+          </label>
+        </fieldset>
+
+        <div id="form-erro" class="alert alert-error" style="display:none; margin-top:8px;"></div>
+
+        <div style="margin-top: 16px; text-align: center;">
+          <button id="btn-gerar" class="btn" type="submit">
+            Gerar minha senha
+          </button>
+        </div>
+
+        <p class="muted small" style="margin-top: 12px;">
+          Ao gerar sua senha, você confirma que está nas proximidades da UBS Carolina Ramos
+          e concorda em aguardar sua chamada pela equipe da unidade.
+        </p>
+      </form>
     </section>
 
-    <p class="muted" style="margin-top:24px;">
-      As senhas desta unidade são apagadas diariamente às 18h.
-    </p>
+    <!-- BLOCO: RESULTADO (ETAPA 2) -->
+    <section id="resultado-section" style="display:none;">
+      <h2>Sua senha foi gerada</h2>
 
-    <p class="muted">
-      <a href="/">↩ Voltar para a página inicial do PegaSenha</a>
-    </p>
+      <div class="ticket-box">
+        <p class="ticket-label">Sua senha</p>
+        <p id="ticket-numero" class="ticket-numero">—</p>
+
+        <p id="ticket-servico" class="ticket-servico">Serviço: —</p>
+        <p id="ticket-posicao" class="ticket-posicao">Posição na fila: —</p>
+      </div>
+
+      <p class="muted small" style="margin-top: 12px;">
+        Aguarde nas proximidades da UBS Carolina Ramos.  
+        Quando sua senha for chamada pela equipe, dirija-se ao atendimento.
+      </p>
+
+      <p class="muted small">
+        Se precisar, você pode gerar uma nova senha caso cometa algum erro nos dados.
+      </p>
+
+      <div style="margin-top: 16px; text-align:center;">
+        <button class="btn-secondary" type="button" onclick="voltarParaFormulario()">
+          Gerar outra senha
+        </button>
+      </div>
+    </section>
+
+    <footer style="margin-top:24px;">
+      <p class="muted small">
+        PegaSenha é um sistema independente, disponibilizado gratuitamente para uso nesta unidade.
+      </p>
+    </footer>
   </main>
 
   <script>
-    function handleSubmit(event) {
+    const formEl = document.getElementById('senha-form');
+    const formSection = document.getElementById('form-section');
+    const resultadoSection = document.getElementById('resultado-section');
+    const erroBox = document.getElementById('form-erro');
+    const btnGerar = document.getElementById('btn-gerar');
+
+    const prefCheckbox = document.getElementById('pref-checkbox');
+    const prefTipoWrapper = document.getElementById('pref-tipo-wrapper');
+    const prefTipoSelect = document.getElementById('pref-tipo');
+
+    const ticketNumeroEl = document.getElementById('ticket-numero');
+    const ticketServicoEl = document.getElementById('ticket-servico');
+    const ticketPosicaoEl = document.getElementById('ticket-posicao');
+
+    // mostra/esconde o motivo preferencial
+    prefCheckbox.addEventListener('change', () => {
+      prefTipoWrapper.style.display = prefCheckbox.checked ? 'block' : 'none';
+      if (!prefCheckbox.checked) {
+        prefTipoSelect.value = '';
+      }
+    });
+
+    formEl.addEventListener('submit', function (event) {
       event.preventDefault();
-      // Depois aqui vamos enviar nome, telefone e serviço para a API (Railway)
-      alert("Em breve esta unidade estará gerando senhas em tempo real pelo PegaSenha.");
+      erroBox.style.display = 'none';
+      erroBox.textContent = '';
+
+      const nome = document.getElementById('nome').value.trim();
+      const telefone = document.getElementById('telefone').value.trim();
+      const servico = document.getElementById('servico').value;
+      const pref = prefCheckbox.checked;
+      const prefTipo = pref ? prefTipoSelect.value : null;
+
+      // validação simples em front
+      if (!nome || !telefone || !servico) {
+        mostrarErro('Preencha nome, telefone e serviço para gerar sua senha.');
+        return;
+      }
+
+      if (pref && !prefTipo) {
+        mostrarErro('Selecione o motivo da prioridade de atendimento.');
+        return;
+      }
+
+      // Desabilita botão e simula envio
+      btnGerar.disabled = true;
+      btnGerar.textContent = 'Gerando sua senha...';
+
+      // Aqui futuramente entra o fetch real para a API:
+      // fetch('/api/filas/pb-carolina/senha', { method:'POST', body: JSON.stringify(...) })
+
+      // Simulação de API (mock) por enquanto:
+      setTimeout(() => {
+        const mockResposta = simularRespostaAPI({ nome, telefone, servico, pref, prefTipo });
+
+        if (mockResposta.erro) {
+          mostrarErro(mockResposta.mensagem || 'Não foi possível gerar sua senha.');
+          btnGerar.disabled = false;
+          btnGerar.textContent = 'Gerar minha senha';
+          return;
+        }
+
+        // Preenche dados na área de resultado
+        ticketNumeroEl.textContent = mockResposta.senha;
+        ticketServicoEl.textContent = 'Serviço: ' + mockResposta.servico_nome;
+        ticketPosicaoEl.textContent = 'Posição na fila: ' + mockResposta.posicao + 'º';
+
+        // Mostra tela de resultado
+        formSection.style.display = 'none';
+        resultadoSection.style.display = 'block';
+
+        // Libera botão para próxima vez
+        btnGerar.disabled = false;
+        btnGerar.textContent = 'Gerar minha senha';
+      }, 800);
+    });
+
+    function mostrarErro(msg) {
+      erroBox.textContent = msg;
+      erroBox.style.display = 'block';
+    }
+
+    function voltarParaFormulario() {
+      resultadoSection.style.display = 'none';
+      formSection.style.display = 'block';
+    }
+
+    // Simulação de "API" local – depois será substituído pelo backend real
+    function simularRespostaAPI(dados) {
+      // Aqui poderíamos simular erros, mas por enquanto só sucesso simples.
+      // Gera um número de senha pseudo-aleatório e posição na fila.
+      const numeroBase = Math.floor(Date.now() / 1000) % 100; // só pra ter algo variando
+      const senha = (numeroBase < 10 ? '0' + numeroBase : '' + numeroBase);
+
+      const nomesServicos = {
+        medico: 'Atendimento médico',
+        enfermagem: 'Enfermagem',
+        farmacia: 'Farmácia',
+        outro: 'Outro atendimento na UBS'
+      };
+
+      const posicao = Math.floor(Math.random() * 10) + 1; // 1 a 10 só pra simular
+
+      return {
+        id: 'mock_' + Date.now(),
+        senha,
+        posicao,
+        servico_id: dados.servico,
+        servico_nome: nomesServicos[dados.servico] || 'Atendimento'
+      };
     }
   </script>
 </body>

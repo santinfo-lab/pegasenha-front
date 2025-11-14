@@ -1,223 +1,494 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <title>PegaSenha • Atendente · UBS Carolina Ramos</title>
+  <meta charset="UTF-8">
+  <title>PegaSenha - Painel UBS Carolina Ramos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/style.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 16px;
+      background: #f3f4f6;
+      color: #111827;
+      display: flex;
+      justify-content: center;
+    }
+    .layout {
+      max-width: 1000px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 2fr 1.2fr;
+      gap: 16px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+      padding: 18px;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 800;
+      margin: 0 0 4px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 10px;
+    }
+    .fila-list {
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .ticket {
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      border: 1px solid #e5e7eb;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f9fafb;
+      transition: transform 0.05s ease, box-shadow 0.05s ease, border-color 0.05s ease;
+    }
+    .ticket:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+      border-color: #d1d5db;
+    }
+    .ticket.selecionado {
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.35);
+      background: #eef2ff;
+    }
+    .ticket-num {
+      font-size: 18px;
+      font-weight: 800;
+      color: #111827;
+    }
+    .ticket-info {
+      font-size: 12px;
+      color: #4b5563;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      margin-left: 4px;
+    }
+    .badge.pref {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .status {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .status.aguardando {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    .status.em_atendimento {
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .status.espera {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+    .status.atendida {
+      background: #e5e7eb;
+      color: #4b5563;
+    }
+    .status.ausente {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .btn-main {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: none;
+      background: #1d4ed8;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-main:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    .stats {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      color: #4b5563;
+    }
+    .pill {
+      background: #f3f4f6;
+      border-radius: 999px;
+      padding: 4px 8px;
+    }
+    .painel-acao-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .linha {
+      margin: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .grid-btns {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .btn-acao {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-acao.chamar {
+      background: #1d4ed8;
+      color: #fff;
+    }
+    .btn-acao.atendida {
+      background: #16a34a;
+      color: #fff;
+    }
+    .btn-acao.ausente {
+      background: #b91c1c;
+      color: #fff;
+    }
+    .btn-acao.espera {
+      background: #facc15;
+      color: #78350f;
+    }
+    .btn-acao.retomar {
+      background: #0f766e;
+      color: #ecfeff;
+    }
+    .msg {
+      margin-top: 10px;
+      font-size: 12px;
+      display: none;
+      padding: 8px 10px;
+      border-radius: 10px;
+    }
+    .msg.erro {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+    }
+    .msg.ok {
+      background: #ecfdf3;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+    .ultimas {
+      font-size: 12px;
+      margin-top: 6px;
+    }
+    .ultimas-item {
+      padding: 3px 0;
+    }
+
+    @media (max-width: 800px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-  <main class="card card-wide">
-    <header class="topbar">
+<div class="layout">
+
+  <!-- COLUNA ESQUERDA: FILA -->
+  <div class="card">
+    <div class="top-row">
       <div>
-        <h1 class="top-title">
-          Pega<span class="brand-accent">Senha</span>
-        </h1>
-        <p class="subtitle">
-          Painel do atendente · UBS Carolina Ramos
-        </p>
+        <div class="title">Fila atual</div>
+        <div class="subtitle">UBS Carolina Ramos • Painel do atendente</div>
       </div>
-      <div class="top-actions">
-        <span class="pill">Operador: <strong>Atendente</strong></span>
-        <button class="btn-secondary" type="button" onclick="alert('No futuro aqui abre as configurações da unidade.');">
-          Configurações
-        </button>
+      <button id="btn-chamar-proximo" class="btn-main">Chamar próximo</button>
+    </div>
+
+    <div class="stats" id="stats">
+      <!-- stats preenchidos via JS -->
+    </div>
+
+    <div class="linha"></div>
+
+    <div id="lista-fila" class="fila-list">
+      <!-- itens da fila -->
+    </div>
+
+    <div id="msg-fila" class="msg erro"></div>
+  </div>
+
+  <!-- COLUNA DIREITA: AÇÕES SOBRE A SENHA -->
+  <div class="card">
+    <div class="painel-acao-title">Senha selecionada</div>
+    <div id="info-senha">
+      <div style="font-size:13px;color:#6b7280;">
+        Toque em uma senha na lista ao lado para ver detalhes e ações.
       </div>
-    </header>
+    </div>
 
-    <section class="layout">
-      <!-- Coluna esquerda: fila atual -->
-      <section class="layout-main">
-        <h2>Fila atual</h2>
+    <div class="linha"></div>
 
-        <div class="fila-table-wrapper">
-          <table class="fila-table">
-            <thead>
-              <tr>
-                <th>Nº</th>
-                <th>Tipo</th>
-                <th>Serviço</th>
-                <th>Espera</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="fila-body">
-              <!-- Linhas serão montadas via JS por enquanto com dados fictícios -->
-            </tbody>
-          </table>
-        </div>
+    <div class="grid-btns">
+      <button id="btn-chamar-agora" class="btn-acao chamar" disabled>Chamar AGORA</button>
+      <button id="btn-marcar-atendida" class="btn-acao atendida" disabled>Marcar como ATENDIDA</button>
+      <button id="btn-marcar-ausente" class="btn-acao ausente" disabled>Marcar como AUSENTE</button>
+      <button id="btn-colocar-espera" class="btn-acao espera" disabled>Colocar em ESPERA</button>
+      <button id="btn-retomar-espera" class="btn-acao retomar" disabled>Retomar da ESPERA</button>
+    </div>
 
-        <div class="actions-row">
-          <button class="btn" type="button" onclick="handleChamarProximo()">
-            Chamar próximo
-          </button>
-        </div>
-      </section>
+    <div id="msg-acao" class="msg"></div>
 
-      <!-- Coluna direita: últimas chamadas / resumo -->
-      <aside class="layout-side">
-        <h3>Últimas chamadas</h3>
-        <ul id="ultimas-chamadas" class="calls-list">
-          <!-- Preenchido via JS com dados fictícios -->
-        </ul>
+    <div class="linha"></div>
 
-        <h3>Resumo do dia</h3>
-        <ul class="stats-list">
-          <li><span>Total de senhas:</span> <strong id="stat-total">0</strong></li>
-          <li><span>Atendidas:</span> <strong id="stat-atendidas">0</strong></li>
-          <li><span>Ausentes:</span> <strong id="stat-ausentes">0</strong></li>
-        </ul>
+    <div class="ultimas">
+      <strong>Últimas chamadas:</strong>
+      <div id="lista-ultimas"></div>
+    </div>
+  </div>
+</div>
 
-        <p class="muted small">
-          Esta tela é de uso exclusivo da equipe da unidade.
-          No futuro ela será conectada à API em tempo real.
-        </p>
-      </aside>
-    </section>
-  </main>
+<script>
+  const BASE_API = "https://pegasenha-api.vercel.app/api";
+  const slugLocal = "pb-carolina";
 
-  <script>
-    // Dados fictícios por enquanto. Depois isso virá da API.
-    let fila = [
-      { id: "t1", numero: 42, tipo: "preferencial", tipo_preferencial: "idoso", servico: "Médico", espera: "12 min", status: "aguardando" },
-      { id: "t2", numero: 43, tipo: "normal", servico: "Enfermagem", espera: "9 min", status: "aguardando" },
-      { id: "t3", numero: 44, tipo: "normal", servico: "Farmácia", espera: "7 min", status: "aguardando" },
-      { id: "t4", numero: 45, tipo: "preferencial", tipo_preferencial: "gestante", servico: "Médico", espera: "5 min", status: "aguardando" }
+  const listaFila = document.getElementById("lista-fila");
+  const statsBox = document.getElementById("stats");
+  const msgFila = document.getElementById("msg-fila");
+  const msgAcao = document.getElementById("msg-acao");
+  const infoSenha = document.getElementById("info-senha");
+  const listaUltimas = document.getElementById("lista-ultimas");
+
+  const btnProximo = document.getElementById("btn-chamar-proximo");
+  const btnChamarAgora = document.getElementById("btn-chamar-agora");
+  const btnAtendida = document.getElementById("btn-marcar-atendida");
+  const btnAusente = document.getElementById("btn-marcar-ausente");
+  const btnEspera = document.getElementById("btn-colocar-espera");
+  const btnRetomar = document.getElementById("btn-retomar-espera");
+
+  let filaAtual = [];
+  let selecionado = null;
+
+  function showMsg(box, texto, tipo) {
+    box.textContent = texto;
+    box.className = "msg " + (tipo === "erro" ? "erro" : "ok");
+    box.style.display = "block";
+  }
+
+  function clearMsg(box) {
+    box.style.display = "none";
+  }
+
+  function renderFila() {
+    listaFila.innerHTML = "";
+    filaAtual.forEach(t => {
+      const div = document.createElement("div");
+      div.className = "ticket" + (selecionado && selecionado.id === t.id ? " selecionado" : "");
+      div.dataset.id = t.id;
+
+      const left = document.createElement("div");
+      const num = document.createElement("div");
+      num.className = "ticket-num";
+      num.textContent = t.numero;
+
+      const info = document.createElement("div");
+      info.className = "ticket-info";
+      info.textContent = t.servico_nome || "Atendimento";
+
+      const status = document.createElement("span");
+      status.className = "status " + t.status;
+      status.textContent = t.status.replace("_", " ");
+
+      const badges = document.createElement("div");
+      badges.style.marginTop = "3px";
+      badges.appendChild(status);
+
+      if (t.preferencial) {
+        const pref = document.createElement("span");
+        pref.className = "badge pref";
+        pref.textContent = "Preferencial";
+        badges.appendChild(pref);
+      }
+
+      left.appendChild(num);
+      left.appendChild(info);
+      left.appendChild(badges);
+
+      div.appendChild(left);
+
+      listaFila.appendChild(div);
+
+      div.addEventListener("click", () => {
+        selecionado = t;
+        atualizarInfoSelecionado();
+        renderFila();
+      });
+    });
+
+    if (filaAtual.length === 0) {
+      listaFila.innerHTML = '<div style="font-size:13px;color:#6b7280;">Nenhuma senha na fila no momento.</div>';
+    }
+  }
+
+  function atualizarInfoSelecionado() {
+    if (!selecionado) {
+      infoSenha.innerHTML = '<div style="font-size:13px;color:#6b7280;">Toque em uma senha na lista ao lado para ver detalhes e ações.</div>';
+      btnChamarAgora.disabled = true;
+      btnAtendida.disabled = true;
+      btnAusente.disabled = true;
+      btnEspera.disabled = true;
+      btnRetomar.disabled = true;
+      return;
+    }
+
+    infoSenha.innerHTML = `
+      <div style="font-size:13px;color:#6b7280;">Senha selecionada:</div>
+      <div style="font-size:26px;font-weight:800;margin-top:2px;">${selecionado.numero}</div>
+      <div style="font-size:13px;color:#374151;margin-top:4px;">${selecionado.servico_nome || "Atendimento"}</div>
+      <div style="margin-top:6px;font-size:12px;">
+        Status atual: <span class="status ${selecionado.status}">${selecionado.status.replace("_"," ")}</span>
+      </div>
+    `;
+
+    btnChamarAgora.disabled = !(selecionado.status === "aguardando" || selecionado.status === "espera");
+    btnAtendida.disabled = !(selecionado.status === "em_atendimento");
+    btnAusente.disabled = false;
+    btnEspera.disabled = !(selecionado.status === "em_atendimento" || selecionado.status === "aguardando");
+    btnRetomar.disabled = !(selecionado.status === "espera");
+  }
+
+  function renderStats(stats) {
+    statsBox.innerHTML = "";
+    if (!stats) return;
+
+    const itens = [
+      { label: "Total", valor: stats.total },
+      { label: "Aguardando", valor: stats.aguardando },
+      { label: "Atendidas", valor: stats.atendidas },
+      { label: "Ausentes", valor: stats.ausentes }
     ];
 
-    let ultimasChamadas = [];
-    let stats = {
-      total: fila.length,
-      atendidas: 0,
-      ausentes: 0
-    };
+    itens.forEach(i => {
+      const span = document.createElement("span");
+      span.className = "pill";
+      span.textContent = `${i.label}: ${i.valor}`;
+      statsBox.appendChild(span);
+    });
+  }
 
-    function renderFila() {
-      const tbody = document.getElementById("fila-body");
-      tbody.innerHTML = "";
+  function renderUltimas(lista) {
+    listaUltimas.innerHTML = "";
+    (lista || []).forEach(u => {
+      const div = document.createElement("div");
+      div.className = "ultimas-item";
+      div.textContent = `Senha ${u.numero} • ${u.servico_nome || ""} • ${u.hora} (${u.tipo})`;
+      listaUltimas.appendChild(div);
+    });
+  }
 
-      fila.forEach((item) => {
-        const tr = document.createElement("tr");
-        tr.className = "status-" + item.status;
-
-        const tipoLabel = item.tipo === "preferencial"
-          ? 'Pref. ' + (item.tipo_preferencial ? '(' + item.tipo_preferencial + ')' : '')
-          : 'Normal';
-
-        tr.innerHTML = `
-          <td>${item.numero}</td>
-          <td>
-            <span class="badge ${item.tipo === "preferencial" ? "badge-pref" : ""}">
-              ${tipoLabel}
-            </span>
-          </td>
-          <td>${item.servico}</td>
-          <td>${item.espera}</td>
-          <td class="fila-actions">
-            <button type="button" class="btn-mini" onclick="handleChamarAgora('${item.id}')">
-              Chamar agora
-            </button>
-            <button type="button" class="btn-mini" onclick="handleAtendida('${item.id}')">
-              Atendida
-            </button>
-            <button type="button" class="btn-mini btn-danger" onclick="handleAusente('${item.id}')">
-              Ausente
-            </button>
-          </td>
-        `;
-
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById("stat-total").textContent = stats.total;
-      document.getElementById("stat-atendidas").textContent = stats.atendidas;
-      document.getElementById("stat-ausentes").textContent = stats.ausentes;
-      renderUltimasChamadas();
-    }
-
-    function renderUltimasChamadas() {
-      const ul = document.getElementById("ultimas-chamadas");
-      ul.innerHTML = "";
-
-      ultimasChamadas.slice(0, 5).forEach((c) => {
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>${c.numero}</strong> · ${c.servico} · ${c.hora}`;
-        ul.appendChild(li);
-      });
-    }
-
-    function nowTime() {
-      const d = new Date();
-      return d.toTimeString().slice(0, 5); // HH:MM
-    }
-
-    function handleChamarProximo() {
-      // Aqui depois a lógica virá da API (preferencial, ordem, etc.).
-      // Por enquanto só pega o primeiro da fila.
-      const proximo = fila.find(i => i.status === "aguardando");
-      if (!proximo) {
-        alert("Não há mais senhas aguardando.");
+  async function carregarFila() {
+    clearMsg(msgFila);
+    try {
+      const res = await fetch(`${BASE_API}/filas/${slugLocal}`);
+      const dados = await res.json();
+      if (!res.ok) {
+        showMsg(msgFila, dados.mensagem || "Erro ao carregar fila.", "erro");
         return;
       }
-
-      proximo.status = "chamada";
-      ultimasChamadas.unshift({
-        numero: proximo.numero,
-        servico: proximo.servico,
-        hora: nowTime(),
-        tipo: "automatico"
-      });
-
-      alert("Chamando senha " + proximo.numero + " (" + proximo.servico + ")");
+      filaAtual = dados.fila || [];
       renderFila();
-    }
-
-    function handleChamarAgora(id) {
-      const item = fila.find(i => i.id === id);
-      if (!item) return;
-
-      const motivo = prompt(
-        "Informe o motivo para chamar esta senha fora da ordem (ex.: emergência, pedido pronto, critério profissional):"
-      );
-
-      if (!motivo) {
-        alert("Motivo é obrigatório para chamada fora de ordem.");
-        return;
+      renderStats(dados.stats);
+      renderUltimas(dados.ultimas_chamadas);
+      if (selecionado) {
+        selecionado = filaAtual.find(t => t.id === selecionado.id) || null;
+        atualizarInfoSelecionado();
       }
-
-      item.status = "chamada";
-      ultimasChamadas.unshift({
-        numero: item.numero,
-        servico: item.servico,
-        hora: nowTime(),
-        tipo: "forcada",
-        motivo
-      });
-
-      alert("Chamando (fora da ordem) senha " + item.numero + ". Motivo: " + motivo);
-      renderFila();
+    } catch (e) {
+      console.error(e);
+      showMsg(msgFila, "Falha de comunicação com o servidor.", "erro");
     }
+  }
 
-    function handleAtendida(id) {
-      const item = fila.find(i => i.id === id);
-      if (!item) return;
-
-      item.status = "atendida";
-      stats.atendidas++;
-      renderFila();
+  async function postAcao(url) {
+    clearMsg(msgAcao);
+    try {
+      const res = await fetch(url, { method: "POST" });
+      const dados = await res.json();
+      if (!res.ok) {
+        showMsg(msgAcao, dados.mensagem || "Erro ao executar ação.", "erro");
+        return false;
+      }
+      showMsg(msgAcao, "Ação realizada com sucesso.", "ok");
+      await carregarFila();
+      return true;
+    } catch (e) {
+      console.error(e);
+      showMsg(msgAcao, "Falha de comunicação com o servidor.", "erro");
+      return false;
     }
+  }
 
-    function handleAusente(id) {
-      const item = fila.find(i => i.id === id);
-      if (!item) return;
+  btnProximo.addEventListener("click", async () => {
+    await postAcao(`${BASE_API}/filas/${slugLocal}/chamar-proximo`);
+  });
 
-      item.status = "ausente";
-      stats.ausentes++;
-      renderFila();
-    }
+  btnChamarAgora.addEventListener("click", async () => {
+    if (!selecionado) return;
+    await postAcao(`${BASE_API}/filas/${slugLocal}/tickets/${selecionado.id}/chamar`);
+  });
 
-    // primeira renderização
-    renderFila();
-  </script>
+  btnAtendida.addEventListener("click", async () => {
+    if (!selecionado) return;
+    await postAcao(`${BASE_API}/filas/${slugLocal}/tickets/${selecionado.id}/atendida`);
+  });
+
+  btnAusente.addEventListener("click", async () => {
+    if (!selecionado) return;
+    await postAcao(`${BASE_API}/filas/${slugLocal}/tickets/${selecionado.id}/ausente`);
+  });
+
+  btnEspera.addEventListener("click", async () => {
+    if (!selecionado) return;
+    await postAcao(`${BASE_API}/filas/${slugLocal}/tickets/${selecionado.id}/espera`);
+  });
+
+  btnRetomar.addEventListener("click", async () => {
+    if (!selecionado) return;
+    await postAcao(`${BASE_API}/filas/${slugLocal}/tickets/${selecionado.id}/retornar`);
+  });
+
+  // Carrega fila inicialmente e a cada 10s
+  carregarFila();
+  setInterval(carregarFila, 10000);
+</script>
 </body>
 </html>

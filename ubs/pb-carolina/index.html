@@ -2,257 +2,628 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <title>PegaSenha • UBS Carolina Ramos</title>
+  <title>PegaSenha • Atendente · UBS Carolina Ramos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/style.css">
 
-  <!-- ESTILOS ESPECÍFICOS DA PÁGINA -->
   <style>
-    .titulo-centralizado { text-align:center; margin-bottom:6px; }
-    .subtitulo-ubs { text-align:center; font-size:0.98rem; margin-bottom:14px; color:#555; }
-
-    .texto-inicial { text-align:center; font-size:1.05rem; margin-bottom:14px; }
-    .alert-red { color:#b91c1c; font-weight:bold; }
-
-    /* Botão centralizado e maior */
-    .btn-grande {
-      padding: 14px 30px;
-      font-size: 1.1rem;
-      border-radius: 12px;
-      display: block;
-      margin: 0 auto;
-      text-align: center;
+    /* ajustes específicos desta tela */
+    .card-wide {
+      max-width: 960px;
     }
 
-    .ticket-box {
-      border: 2px solid #eee;
-      padding: 20px;
-      border-radius: 12px;
-      margin-top: 10px;
-      text-align: center;
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:16px;
+    }
+    .top-title {
+      margin:0;
+    }
+    .brand-accent {
+      color:#2563eb;
+    }
+    .subtitle {
+      margin:2px 0 0;
+      font-size:0.9rem;
+      color:#6b7280;
+    }
+    .top-actions {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      justify-content:flex-end;
+    }
+    .pill {
+      display:inline-flex;
+      align-items:center;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#eff6ff;
+      font-size:0.85rem;
+      color:#1e40af;
     }
 
-    .ticket-numero {
-      font-size: 2.8rem;
-      font-weight: bold;
-      margin: 4px 0 10px 0;
+    .layout {
+      display:grid;
+      grid-template-columns: minmax(0,2fr) minmax(0,1fr);
+      gap:16px;
+    }
+    @media (max-width: 768px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .fila-table-wrapper {
+      max-height:320px;
+      overflow:auto;
+      border-radius:12px;
+      border:1px solid #e5e7eb;
+    }
+    .fila-table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:0.9rem;
+    }
+    .fila-table th,
+    .fila-table td {
+      padding:8px 10px;
+      text-align:left;
+    }
+    .fila-table thead {
+      background:#f9fafb;
+      position:sticky;
+      top:0;
+    }
+    .fila-table tbody tr:nth-child(even) {
+      background:#f9fafb;
+    }
+
+    .fila-actions {
+      display:flex;
+      justify-content:flex-end;
+    }
+    .fila-actions-center {
+      justify-content:center;
+    }
+
+    .badge {
+      display:inline-flex;
+      align-items:center;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:0.75rem;
+      background:#e5e7eb;
+    }
+    .badge-pref {
+      background:#f5e7ff;
+      color:#6b21a8;
+    }
+
+    /* estados visuais */
+    .status-em_atendimento {
+      background:#eff6ff;
+    }
+    .status-atendida {
+      opacity:0.55;
+    }
+    .status-ausente {
+      background:#fef2f2;
+    }
+    .status-espera {
+      background:#fef9c3;
+    }
+
+    .btn-secondary {
+      border-radius:999px;
+      padding:8px 14px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      font-size:0.85rem;
+    }
+    .btn-secondary:active {
+      transform:scale(0.98);
+    }
+
+    .btn-mini {
+      border-radius:999px;
+      padding:4px 8px;
+      border:none;
+      font-size:0.75rem;
+      background:#e5e7eb;
+    }
+    .btn-mini:active {
+      transform:scale(0.97);
+    }
+    .btn-danger {
+      background:#fee2e2;
+    }
+
+    .btn-icon {
+      border:none;
+      background:transparent;
+      font-size:1.2rem;
+      line-height:1;
+      cursor:pointer;
+    }
+    .btn-icon:active {
+      transform:scale(0.9);
+    }
+
+    .actions-row {
+      margin-top:12px;
+      text-align:center;
+    }
+
+    .layout-side {
+      border-left:1px solid #e5e7eb;
+      padding-left:12px;
+    }
+    @media (max-width: 768px) {
+      .layout-side {
+        border-left:none;
+        padding-left:0;
+        border-top:1px solid #e5e7eb;
+        padding-top:12px;
+      }
+    }
+
+    .calls-list,
+    .stats-list {
+      list-style:none;
+      padding-left:0;
+      margin:8px 0 16px;
+    }
+    .calls-list li,
+    .stats-list li {
+      font-size:0.85rem;
+      margin-bottom:4px;
+    }
+    .stats-list li span {
+      color:#6b7280;
+      margin-right:4px;
+    }
+    .small {
+      font-size:0.8rem;
+    }
+
+    /* cortina lateral da senha */
+    .hidden {
+      display:none;
+    }
+
+    .ticket-menu-backdrop {
+      position:fixed;
+      inset:0;
+      background:rgba(15, 23, 42, 0.35);
+      z-index:40;
+    }
+
+    .ticket-menu {
+      position:fixed;
+      top:0;
+      right:0;
+      width:280px;
+      max-width:80%;
+      height:100%;
+      background:#ffffff;
+      box-shadow:-8px 0 24px rgba(0,0,0,0.1);
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      z-index:50;
+    }
+
+    .ticket-menu-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:8px;
+      border-bottom:1px solid #e5e7eb;
+      padding-bottom:8px;
+    }
+    .ticket-menu-label {
+      text-transform:uppercase;
+      letter-spacing:0.05em;
+      font-size:0.7rem;
+      color:#6b7280;
+      margin:0 0 2px;
+    }
+    #ticket-menu-title {
+      margin:0;
+    }
+    .ticket-menu-body {
+      margin-top:12px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .full-width {
+      width:100%;
+      text-align:center;
+    }
+
+    .badge-status {
+      font-size:0.7rem;
+      padding:2px 6px;
+      border-radius:999px;
+      background:#e5e7eb;
+      margin-left:4px;
+    }
+    .badge-status-espera {
+      background:#fef9c3;
+    }
+    .badge-status-em_atendimento {
+      background:#dbeafe;
     }
   </style>
 </head>
-
 <body>
-  <main class="card">
-
-    <!-- CABEÇALHO -->
-    <header style="margin-bottom: 20px;">
-      <h1 class="top-title titulo-centralizado">
-        Pega<span class="brand-accent">Senha</span>
-      </h1>
-
-      <!-- Nome da UBS — restaurado -->
-      <p class="subtitulo-ubs">
-        UBS Carolina Ramos · Porto Belo (SC)
-      </p>
-
-      <p class="texto-inicial">
-        Este serviço organiza a fila de atendimento desta unidade.<br>
-        Aqui você gera sua senha.
-      </p>
-    </header>
-
-    <!-- FORMULÁRIO -->
-    <section id="form-section">
-      <p class="alert-red" style="text-align:center; margin-bottom:16px;">
-        Preencha seus dados para entrar na fila desta unidade.
-      </p>
-
-      <form id="senha-form" class="form-layout">
-
-        <label class="field">
-          <span>Nome completo</span>
-          <input id="nome" name="nome" type="text" required placeholder="Seu nome completo">
-        </label>
-
-        <label class="field">
-          <span>Telefone (WhatsApp ou celular)</span>
-          <input id="telefone" name="telefone" type="tel" required placeholder="(47) 9 9999-9999">
-        </label>
-
-        <label class="field">
-          <span>Serviço desejado</span>
-          <select id="servico" name="servico" required>
-            <option value="">Selecione um serviço</option>
-            <option value="medico">Atendimento médico</option>
-            <option value="enfermagem">Enfermagem</option>
-            <option value="farmacia">Farmácia</option>
-            <option value="outro">Outro atendimento na UBS</option>
-          </select>
-        </label>
-
-        <!-- Preferencial -->
-        <fieldset class="field">
-          <legend class="field-legend">Atendimento preferencial</legend>
-
-          <label class="checkbox-line">
-            <input type="checkbox" id="pref-checkbox">
-            <span>Preciso de atendimento preferencial</span>
-          </label>
-
-          <label class="field" id="pref-tipo-wrapper" style="display:none; margin-top:8px;">
-            <span>Motivo da prioridade</span>
-            <select id="pref-tipo">
-              <option value="">Selecione uma opção</option>
-              <option value="idoso">Idoso (60+)</option>
-              <option value="gestante">Gestante</option>
-              <option value="pcd">Pessoa com deficiência</option>
-              <option value="lactante">Lactante</option>
-              <option value="crianca_colo">Pessoa com criança de colo</option>
-              <option value="tea">Pessoa com TEA</option>
-              <option value="outro">Outro motivo previsto em lei</option>
-            </select>
-          </label>
-        </fieldset>
-
-        <div id="form-erro" class="alert alert-error" style="display:none; margin-top:8px;"></div>
-
-        <!-- BOTÃO GERAR SENHA -->
-        <div style="margin-top: 22px;">
-          <button id="btn-gerar" class="btn btn-grande" type="submit">
-            GERAR SENHA
-          </button>
-        </div>
-
-        <p class="muted small" style="margin-top: 16px; text-align:center;">
-          <strong>
-            Ao gerar sua senha, você concorda que deve permanecer nas proximidades desta UBS
-            e aguardar sua chamada pela equipe da unidade.
-          </strong>
+  <main class="card card-wide">
+    <header class="topbar">
+      <div>
+        <h1 class="top-title">
+          Pega<span class="brand-accent">Senha</span>
+        </h1>
+        <p id="ubs-subtitle" class="subtitle">
+          Painel do atendente · UBS Carolina Ramos
         </p>
-
-      </form>
-    </section>
-
-    <!-- RESULTADO -->
-    <section id="resultado-section" style="display:none;">
-      <h2 style="text-align:center;">Sua senha foi gerada</h2>
-
-      <div class="ticket-box">
-        <p class="ticket-label">Sua senha</p>
-        <p id="ticket-numero" class="ticket-numero">—</p>
-
-        <p id="ticket-servico" class="ticket-servico">Serviço: —</p>
-        <p id="ticket-posicao" class="ticket-posicao">Posição na fila: —</p>
       </div>
-
-      <p class="muted small" style="margin-top: 14px; text-align:center;">
-        Aguarde nas proximidades da UBS Carolina Ramos.<br>
-        Quando sua senha for chamada, dirija-se ao atendimento.
-      </p>
-
-      <div style="margin-top: 18px; text-align:center;">
-        <button class="btn-secondary" type="button" onclick="voltarParaFormulario()">
-          Gerar outra senha
+      <div class="top-actions">
+        <span class="pill">Operador: <strong>Atendente</strong></span>
+        <button class="btn-secondary" type="button"
+          onclick="alert('No futuro aqui abre as configurações da unidade.');">
+          Configurações
         </button>
       </div>
-    </section>
+    </header>
 
-    <footer style="margin-top:24px; text-align:center;">
-      <p class="muted small">
-        PegaSenha é um sistema independente, disponibilizado gratuitamente para esta unidade.
-      </p>
-    </footer>
+    <section class="layout">
+      <!-- Coluna esquerda: fila atual -->
+      <section class="layout-main">
+        <h2>Fila atual</h2>
+
+        <div class="fila-table-wrapper">
+          <table class="fila-table">
+            <thead>
+              <tr>
+                <th>Nº</th>
+                <th>Tipo</th>
+                <th>Serviço</th>
+                <th>Status</th>
+                <th style="text-align:center;">Opções</th>
+              </tr>
+            </thead>
+            <tbody id="fila-body">
+              <!-- Linhas montadas via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="actions-row">
+          <button class="btn" type="button" onclick="handleChamarProximo()">
+            Chamar próximo
+          </button>
+        </div>
+      </section>
+
+      <!-- Coluna direita: últimas chamadas / resumo -->
+      <aside class="layout-side">
+        <h3>Últimas chamadas</h3>
+        <ul id="ultimas-chamadas" class="calls-list"></ul>
+
+        <h3>Resumo do dia</h3>
+        <ul class="stats-list">
+          <li><span>Total de senhas:</span> <strong id="stat-total">0</strong></li>
+          <li><span>Aguardando:</span> <strong id="stat-aguardando">0</strong></li>
+          <li><span>Atendidas:</span> <strong id="stat-atendidas">0</strong></li>
+          <li><span>Ausentes:</span> <strong id="stat-ausentes">0</strong></li>
+        </ul>
+
+        <p class="muted small">
+          Esta tela é de uso exclusivo da equipe da unidade.
+          Em breve estará conectada ao painel e a outras telas do PegaSenha.
+        </p>
+      </aside>
+    </section>
   </main>
 
-  <!-- SCRIPT -->
+  <!-- Cortina lateral de ações da senha -->
+  <div id="ticket-menu-backdrop" class="ticket-menu-backdrop hidden" onclick="closeTicketMenu()"></div>
+
+  <aside id="ticket-menu" class="ticket-menu hidden" aria-hidden="true">
+    <header class="ticket-menu-header">
+      <div>
+        <p class="ticket-menu-label">Senha selecionada</p>
+        <h2 id="ticket-menu-title">—</h2>
+        <p id="ticket-menu-subtitle" class="muted small">—</p>
+      </div>
+      <button class="btn-icon" type="button" onclick="closeTicketMenu()">✕</button>
+    </header>
+
+    <div class="ticket-menu-body">
+      <button id="btn-menu-chamar-agora" class="btn full-width" type="button" onclick="handleChamarAgoraSelected()">
+        Chamar AGORA
+      </button>
+
+      <button class="btn-secondary full-width" type="button" onclick="handleAtendidaSelected()">
+        Marcar como ATENDIDA
+      </button>
+
+      <button class="btn-mini btn-danger full-width" type="button" onclick="handleAusenteSelected()">
+        Marcar como AUSENTE
+      </button>
+
+      <button id="btn-menu-espera" class="btn-mini full-width" type="button" onclick="toggleEsperaSelected()">
+        Colocar em ESPERA
+      </button>
+
+      <p class="muted small" style="margin-top:16px;">
+        Chamadas fora da ordem e senhas em espera devem ser justificadas pela equipe
+        e ficam registradas para fins de auditoria.
+      </p>
+    </div>
+  </aside>
+
   <script>
-    const formEl = document.getElementById('senha-form');
-    const formSection = document.getElementById('form-section');
-    const resultadoSection = document.getElementById('resultado-section');
-    const erroBox = document.getElementById('form-erro');
-    const btnGerar = document.getElementById('btn-gerar');
+    const SLUG = 'pb-carolina';
+    const BASE_API = ''; // se backend estiver no mesmo domínio; senão, use 'https://api.pegasenha.com.br'
 
-    const prefCheckbox = document.getElementById('pref-checkbox');
-    const prefTipoWrapper = document.getElementById('pref-tipo-wrapper');
-    const prefTipoSelect = document.getElementById('pref-tipo');
+    let currentFila = [];
+    let currentUltimas = [];
+    let currentStats = { total: 0, aguardando: 0, atendidas: 0, ausentes: 0 };
+    let selectedTicketId = null;
+    let selectedTicket = null;
+    let isRefreshing = false;
 
-    const ticketNumeroEl = document.getElementById('ticket-numero');
-    const ticketServicoEl = document.getElementById('ticket-servico');
-    const ticketPosicaoEl = document.getElementById('ticket-posicao');
-
-    prefCheckbox.addEventListener('change', () => {
-      prefTipoWrapper.style.display = prefCheckbox.checked ? 'block' : 'none';
-      if (!prefCheckbox.checked) prefTipoSelect.value = '';
-    });
-
-    formEl.addEventListener('submit', function (event) {
-      event.preventDefault();
-      erroBox.style.display = 'none';
-      erroBox.textContent = '';
-
-      const nome = document.getElementById('nome').value.trim();
-      const telefone = document.getElementById('telefone').value.trim();
-      const servico = document.getElementById('servico').value;
-      const pref = prefCheckbox.checked;
-      const prefTipo = pref ? prefTipoSelect.value : null;
-
-      if (!nome || !telefone || !servico) {
-        return mostrarErro('Preencha nome, telefone e serviço.');
-      }
-      if (pref && !prefTipo) {
-        return mostrarErro('Selecione o motivo da prioridade.');
-      }
-
-      btnGerar.disabled = true;
-      btnGerar.textContent = 'Gerando...';
-
-      setTimeout(() => {
-        const r = simularRespostaAPI();
-
-        if (r.erro) {
-          mostrarErro(r.mensagem || 'Erro ao gerar senha.');
-          btnGerar.disabled = false;
-          btnGerar.textContent = 'GERAR SENHA';
-          return;
+    async function fetchJSON(path, options = {}) {
+      try {
+        const res = await fetch(BASE_API + path, {
+          headers: { 'Content-Type': 'application/json' },
+          ...options
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          const msg = data.mensagem || data.erro || 'Erro na API.';
+          throw new Error(msg);
         }
-
-        ticketNumeroEl.textContent = r.senha;
-        ticketServicoEl.textContent = 'Serviço: ' + r.servico_nome;
-        ticketPosicaoEl.textContent = 'Posição na fila: ' + r.posicao + 'º';
-
-        formSection.style.display = 'none';
-        resultadoSection.style.display = 'block';
-
-        btnGerar.disabled = false;
-        btnGerar.textContent = 'GERAR SENHA';
-      }, 700);
-    });
-
-    function mostrarErro(msg) {
-      erroBox.textContent = msg;
-      erroBox.style.display = 'block';
+        return data;
+      } catch (err) {
+        console.error(err);
+        alert('Erro: ' + err.message);
+        throw err;
+      }
     }
 
-    function voltarParaFormulario() {
-      resultadoSection.style.display = 'none';
-      formSection.style.display = 'block';
+    async function loadLocalInfo() {
+      try {
+        const local = await fetchJSON(`/api/locais/${SLUG}`);
+        const subtitleEl = document.getElementById('ubs-subtitle');
+        subtitleEl.textContent = `Painel do atendente · ${local.nome} · ${local.endereco?.cidade || ''} ${local.endereco?.uf || ''}`.trim();
+      } catch (e) {
+        // se falhar, mantém texto padrão
+      }
     }
 
-    function simularRespostaAPI() {
-      const n = Math.floor(Date.now()/1000) % 100;
-      const senha = n < 10 ? '0'+n : ''+n;
-      const servicos = {
-        medico:'Atendimento médico',
-        enfermagem:'Enfermagem',
-        farmacia:'Farmácia',
-        outro:'Outro atendimento na UBS'
+    async function loadFila() {
+      if (isRefreshing) return;
+      isRefreshing = true;
+      try {
+        const data = await fetchJSON(`/api/filas/${SLUG}`);
+        currentFila = data.fila || [];
+        currentUltimas = data.ultimas_chamadas || [];
+        currentStats = data.stats || currentStats;
+        renderFila();
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    function renderFila() {
+      const tbody = document.getElementById('fila-body');
+      tbody.innerHTML = '';
+
+      currentFila.forEach((item) => {
+        const tr = document.createElement('tr');
+        tr.className = item.status ? `status-${item.status}` : '';
+
+        const tipoLabel = item.preferencial
+          ? 'Preferencial'
+          : 'Normal';
+
+        const statusLabelMap = {
+          aguardando: 'Aguardando',
+          em_atendimento: 'Em atendimento',
+          atendida: 'Atendida',
+          ausente: 'Ausente',
+          espera: 'Em espera'
+        };
+        const statusLabel = statusLabelMap[item.status] || item.status || '';
+
+        tr.innerHTML = `
+          <td>${item.numero}</td>
+          <td>
+            <span class="badge ${item.preferencial ? 'badge-pref' : ''}">
+              ${tipoLabel}
+            </span>
+          </td>
+          <td>${item.servico_nome || item.servico_id}</td>
+          <td>
+            ${statusLabel}
+          </td>
+          <td class="fila-actions fila-actions-center">
+            <button type="button" class="btn-icon" onclick="openTicketMenu('${item.id}')">
+              ⋮
+            </button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      // stats
+      document.getElementById('stat-total').textContent = currentStats.total || 0;
+      document.getElementById('stat-aguardando').textContent = currentStats.aguardando || 0;
+      document.getElementById('stat-atendidas').textContent = currentStats.atendidas || 0;
+      document.getElementById('stat-ausentes').textContent = currentStats.ausentes || 0;
+
+      renderUltimasChamadas();
+    }
+
+    function renderUltimasChamadas() {
+      const ul = document.getElementById('ultimas-chamadas');
+      ul.innerHTML = '';
+
+      (currentUltimas || []).slice(0, 6).forEach((c) => {
+        const li = document.createElement('li');
+        const tipoTxt = c.tipo === 'manual' ? ' (fora da ordem)' : '';
+        li.innerHTML = `<strong>${c.numero}</strong> · ${c.servico_nome || ''} · ${c.hora || ''}${tipoTxt}`;
+        ul.appendChild(li);
+      });
+    }
+
+    async function handleChamarProximo() {
+      try {
+        const resp = await fetchJSON(`/api/filas/${SLUG}/chamar-proximo`, {
+          method: 'POST',
+          body: JSON.stringify({})
+        });
+
+        if (resp.status === 'fila_vazia') {
+          alert('Não há mais senhas aguardando.');
+        } else if (resp.ticket) {
+          alert('Chamando senha ' + resp.ticket.numero + ' (' + (resp.ticket.servico_nome || '') + ')');
+        }
+        await loadFila();
+      } catch (e) {
+        // erro já tratado em fetchJSON
+      }
+    }
+
+    function openTicketMenu(id) {
+      selectedTicketId = id;
+      selectedTicket = currentFila.find(i => i.id === id) || null;
+      if (!selectedTicket) return;
+
+      const titleEl = document.getElementById("ticket-menu-title");
+      const subtitleEl = document.getElementById("ticket-menu-subtitle");
+      const btnEspera = document.getElementById("btn-menu-espera");
+      const btnChamarAgora = document.getElementById("btn-menu-chamar-agora");
+
+      titleEl.textContent = "Senha " + selectedTicket.numero;
+
+      const tipoLabel = selectedTicket.preferencial
+        ? "Preferencial" + (selectedTicket.tipo_preferencial ? " · " + selectedTicket.tipo_preferencial : "")
+        : "Normal";
+
+      const statusLabelMap = {
+        aguardando: 'Aguardando',
+        em_atendimento: 'Em atendimento',
+        atendida: 'Atendida',
+        ausente: 'Ausente',
+        espera: 'Em espera'
       };
-      return {
-        senha,
-        posicao: Math.floor(Math.random()*10)+1,
-        servico_nome: servicos[document.getElementById('servico').value]
-      };
+      const statusLabel = statusLabelMap[selectedTicket.status] || selectedTicket.status || '';
+
+      subtitleEl.textContent = `${tipoLabel} · ${selectedTicket.servico_nome || selectedTicket.servico_id} · ${statusLabel}`;
+
+      // botão de esperar / retornar
+      if (selectedTicket.status === 'espera') {
+        btnEspera.textContent = 'Retirar de ESPERA';
+      } else {
+        btnEspera.textContent = 'Colocar em ESPERA';
+      }
+
+      // Em espera/aguardando pode chamar agora
+      btnChamarAgora.disabled = (selectedTicket.status === 'atendida' || selectedTicket.status === 'ausente');
+
+      document.getElementById("ticket-menu").classList.remove("hidden");
+      document.getElementById("ticket-menu-backdrop").classList.remove("hidden");
     }
+
+    function closeTicketMenu() {
+      selectedTicketId = null;
+      selectedTicket = null;
+      document.getElementById("ticket-menu").classList.add("hidden");
+      document.getElementById("ticket-menu-backdrop").classList.add("hidden");
+    }
+
+    async function handleChamarAgoraSelected() {
+      if (!selectedTicketId || !selectedTicket) return;
+
+      try {
+        const resp = await fetchJSON(`/api/filas/${SLUG}/tickets/${selectedTicketId}/chamar`, {
+          method: 'POST',
+          body: JSON.stringify({})
+        });
+
+        if (resp.ticket) {
+          alert('Chamando senha ' + resp.ticket.numero + ' (' + (resp.ticket.servico_nome || '') + ')');
+        }
+        await loadFila();
+        closeTicketMenu();
+      } catch (e) {}
+    }
+
+    async function handleAtendidaSelected() {
+      if (!selectedTicketId) return;
+
+      try {
+        await fetchJSON(`/api/filas/${SLUG}/tickets/${selectedTicketId}/atendida`, {
+          method: 'POST',
+          body: JSON.stringify({})
+        });
+        await loadFila();
+        closeTicketMenu();
+      } catch (e) {}
+    }
+
+    async function handleAusenteSelected() {
+      if (!selectedTicketId) return;
+
+      try {
+        await fetchJSON(`/api/filas/${SLUG}/tickets/${selectedTicketId}/ausente`, {
+          method: 'POST',
+          body: JSON.stringify({})
+        });
+        await loadFila();
+        closeTicketMenu();
+      } catch (e) {}
+    }
+
+    async function toggleEsperaSelected() {
+      if (!selectedTicketId || !selectedTicket) return;
+
+      try {
+        if (selectedTicket.status === 'espera') {
+          // retirar de espera
+          await fetchJSON(`/api/filas/${SLUG}/tickets/${selectedTicketId}/retornar`, {
+            method: 'POST',
+            body: JSON.stringify({})
+          });
+        } else {
+          // colocar em espera
+          await fetchJSON(`/api/filas/${SLUG}/tickets/${selectedTicketId}/espera`, {
+            method: 'POST',
+            body: JSON.stringify({})
+          });
+        }
+        await loadFila();
+        closeTicketMenu();
+      } catch (e) {}
+    }
+
+    // Carregamento inicial
+    (async function init() {
+      await loadLocalInfo();
+      await loadFila();
+      // opcional: auto refresh a cada 10s
+      setInterval(loadFila, 10000);
+    })();
   </script>
-
 </body>
 </html>

@@ -234,15 +234,11 @@
       <button id="btn-chamar-proximo" class="btn-main">Chamar próximo</button>
     </div>
 
-    <div class="stats" id="stats">
-      <!-- stats preenchidos via JS -->
-    </div>
+    <div class="stats" id="stats"></div>
 
     <div class="linha"></div>
 
-    <div id="lista-fila" class="fila-list">
-      <!-- itens da fila -->
-    </div>
+    <div id="lista-fila" class="fila-list"></div>
 
     <div id="msg-fila" class="msg erro"></div>
   </div>
@@ -279,7 +275,7 @@
 
 <script>
   const BASE_API = "https://pegasenha-api.vercel.app/api";
-  const slugLocal = "pb-carolina";
+  const ubsSlug = "pb-carolina";
 
   const listaFila = document.getElementById("lista-fila");
   const statsBox = document.getElementById("stats");
@@ -418,10 +414,7 @@
   async function carregarFila() {
     clearMsg(msgFila);
     try {
-      const url = new URL(`${BASE_API}/filas`, window.location.origin);
-      url.searchParams.set("slug", slugLocal);
-
-      const res = await fetch(url.toString());
+      const res = await fetch(`${BASE_API}/fila/${ubsSlug}`);
       const dados = await res.json();
       if (!res.ok || !dados.ok) {
         showMsg(msgFila, dados.mensagem || "Erro ao carregar fila.", "erro");
@@ -444,8 +437,7 @@
   async function postAcao({ acao, id = null }) {
     clearMsg(msgAcao);
     try {
-      const url = new URL(`${BASE_API}/filas`, window.location.origin);
-      url.searchParams.set("slug", slugLocal);
+      const url = new URL(`${BASE_API}/fila/${ubsSlug}`, window.location.origin);
       url.searchParams.set("acao", acao);
       if (id) url.searchParams.set("id", id);
 

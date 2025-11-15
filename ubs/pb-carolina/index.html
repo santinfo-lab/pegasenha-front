@@ -1,297 +1,136 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>PegaSenha - UBS Carolina Ramos</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  <meta charset="UTF-8" />
+  <title>PegaSenha – UBS PB Carolina</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/style.css" />
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
     body {
-      background: #f4f6fb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f3f4f6;
       margin: 0;
+      padding: 0;
+    }
+
+    .app {
+      max-width: 800px;
+      margin: 0 auto;
       padding: 16px;
-      display: flex;
-      justify-content: center;
+      text-align: center;
     }
-    .card {
-      background: #fff;
-      max-width: 480px;
-      width: 100%;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-      padding: 24px 20px 28px;
-    }
+
     h1 {
-      margin: 0;
-      text-align: center;
-      font-size: 26px;
-      font-weight: 800;
-      color: #1f2a4d;
-    }
-    .sub {
-      margin-top: 6px;
-      text-align: center;
-      font-size: 14px;
-      color: #4a4f63;
-    }
-    .alert {
-      margin-top: 16px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      background: #fff3cd;
-      color: #7c5a00;
-      font-size: 13px;
-    }
-    .alert strong {
-      color: #b8860b;
-    }
-    .divider {
-      margin: 18px 0 12px;
-      border-bottom: 1px solid #e0e4f0;
-    }
-    label {
-      font-size: 13px;
-      color: #333;
-      display: block;
+      font-size: 1.5rem;
       margin-bottom: 4px;
-      font-weight: 600;
     }
-    input, select {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid #d1d5e5;
-      font-size: 14px;
-      outline: none;
-    }
-    input:focus, select:focus {
-      border-color: #1d4ed8;
-      box-shadow: 0 0 0 1px rgba(37,99,235,0.2);
-    }
-    .field {
-      margin-bottom: 12px;
-    }
-    .servicos {
+
+    .sub {
+      font-size: 0.95rem;
+      color: #4b5563;
       margin-bottom: 16px;
     }
-    .preferencial-row {
-      display: flex;
-      align-items: center;
-      margin-top: 4px;
-      gap: 6px;
-      font-size: 13px;
-      color: #444;
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      margin-bottom: 16px;
     }
-    .preferencial-row input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
+
+    .fila-resumo {
+      font-size: 1rem;
+      margin-bottom: 8px;
     }
-    .btn {
-      width: 100%;
-      padding: 12px;
-      border-radius: 999px;
-      border: none;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      background: #1d4ed8;
-      color: #fff;
-      margin-top: 10px;
-    }
-    .btn:disabled {
-      background: #9ca3af;
-      cursor: not-allowed;
-    }
-    .termos {
-      margin-top: 10px;
-      font-size: 11px;
-      color: #555;
-      text-align: center;
-    }
-    .termos b {
-      font-weight: 700;
-    }
-    .msg {
-      margin-top: 14px;
-      font-size: 13px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      display: none;
-    }
-    .msg.ok {
-      background: #ecfdf3;
-      color: #166534;
-      border: 1px solid #bbf7d0;
-    }
-    .msg.erro {
-      background: #fef2f2;
+
+    .erro {
       color: #b91c1c;
-      border: 1px solid #fecaca;
+      font-size: 0.9rem;
+      margin-top: 8px;
     }
-    .senha-destaque {
-      font-size: 18px;
-      font-weight: 800;
-      margin-top: 4px;
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
     }
-    .rodape-info {
-      margin-top: 16px;
-      font-size: 11px;
-      color: #6b7280;
-      text-align: center;
+
+    li {
+      font-size: 0.9rem;
+      padding: 4px 0;
+      border-bottom: 1px solid #e5e7eb;
     }
   </style>
 </head>
 <body>
-<div class="card">
-  <h1>PegaSenha</h1>
-  <div class="sub">UBS Carolina Ramos (Perequê)</div>
+  <div class="app">
+    <h1>UBS PB Carolina</h1>
+    <div class="sub">
+      Situação atual da fila (visualização pública, leitura apenas).
+    </div>
 
-  <div class="alert">
-    <strong>Este serviço organiza a fila de atendimento desta unidade.</strong><br>
-    Aqui você gera sua senha.
+    <div class="card">
+      <div id="resumo" class="fila-resumo">Carregando fila...</div>
+      <div id="lista"></div>
+      <div id="erro" class="erro" style="display:none;"></div>
+    </div>
+
+    <div class="card" style="font-size:0.85rem; color:#4b5563;">
+      Em breve esta tela permitirá que você retire sua senha pelo celular.
+      Neste momento ela apenas mostra a fila em tempo real.
+    </div>
   </div>
 
-  <div class="divider"></div>
+  <script>
+    const API_BASE = "https://pegasenha-api.vercel.app/api";
+    const UBS_SLUG = "pb-carolina";
 
-  <div style="font-size:13px;color:#b91c1c;text-align:center;margin-bottom:10px;">
-    <strong>Preencha seus dados para entrar na fila desta unidade.</strong>
-  </div>
+    async function atualizarFilaPublica() {
+      const resumoEl = document.getElementById("resumo");
+      const listaEl = document.getElementById("lista");
+      const erroEl = document.getElementById("erro");
 
-  <form id="form-senha">
-    <div class="field">
-      <label for="nome">Seu nome completo</label>
-      <input id="nome" name="nome" type="text" autocomplete="name" required>
-    </div>
+      erroEl.style.display = "none";
+      erroEl.textContent = "";
 
-    <div class="field">
-      <label for="telefone">Celular (WhatsApp, se possível)</label>
-      <input id="telefone" name="telefone" type="tel" inputmode="tel" autocomplete="tel" required>
-    </div>
+      try {
+        const resp = await fetch(`${API_BASE}/fila/${UBS_SLUG}`);
+        if (!resp.ok) {
+          throw new Error("Status " + resp.status);
+        }
 
-    <div class="field servicos">
-      <label for="servico">Qual atendimento você precisa hoje?</label>
-      <select id="servico" name="servico" required>
-        <option value="">Selecione...</option>
-        <!-- opções serão carregadas da API -->
-      </select>
-    </div>
+        const data = await resp.json();
+        const fila = Array.isArray(data.fila) ? data.fila : [];
+        const stats = data.stats || {};
 
-    <div class="preferencial-row">
-      <input type="checkbox" id="preferencial">
-      <label for="preferencial" style="margin:0;font-weight:500;">
-        Sou idoso (60+), gestante, PCD ou tenho direito a atendimento preferencial.
-      </label>
-    </div>
+        resumoEl.innerHTML = `
+          Há <strong>${stats.aguardando ?? fila.length}</strong> pessoas aguardando.
+        `;
 
-    <button type="submit" id="btn-gerar" class="btn">GERAR SENHA</button>
+        if (fila.length === 0) {
+          listaEl.innerHTML = "<p>Nenhuma senha na fila no momento.</p>";
+        } else {
+          const itens = fila.map((item, idx) => {
+            const tipoPref =
+              item.preferencial === true || item.preferencial === "true"
+                ? " (preferencial)"
+                : "";
+            return `<li>${idx + 1}º – Senha <strong>${item.numero}</strong>${tipoPref}</li>`;
+          }).join("");
 
-    <div class="termos">
-      <b>Ao gerar sua senha</b>, você concorda que deve permanecer nas proximidades desta UBS
-      e aguardar sua chamada pela equipe da unidade.
-    </div>
-  </form>
-
-  <div id="msg" class="msg"></div>
-
-  <div class="rodape-info">
-    As senhas desta fila são apagadas automaticamente todos os dias à meia-noite (00h).
-  </div>
-</div>
-
-<script>
-  const BASE_API = "https://pegasenha-api.vercel.app/api";
-  const slugLocal = "pb-carolina";
-
-  const selectServico = document.getElementById("servico");
-  const form = document.getElementById("form-senha");
-  const btnGerar = document.getElementById("btn-gerar");
-  const msgBox = document.getElementById("msg");
-  const chkPreferencial = document.getElementById("preferencial");
-
-  function showMsg(texto, tipo) {
-    msgBox.textContent = texto;
-    msgBox.className = "msg " + (tipo === "erro" ? "erro" : "ok");
-    msgBox.style.display = "block";
-  }
-
-  async function carregarServicos() {
-    try {
-      const res = await fetch(`${BASE_API}/locais/${slugLocal}`);
-      if (!res.ok) throw new Error("Falha ao obter dados da unidade.");
-      const local = await res.json();
-
-      selectServico.innerHTML = '<option value="">Selecione...</option>';
-      (local.servicos || []).forEach(s => {
-        const opt = document.createElement("option");
-        opt.value = s.id;
-        opt.textContent = s.nome;
-        selectServico.appendChild(opt);
-      });
-    } catch (e) {
-      console.error(e);
-      showMsg("Não foi possível carregar os serviços desta unidade. Tente novamente mais tarde.", "erro");
-    }
-  }
-
-  carregarServicos();
-
-  form.addEventListener("submit", async (ev) => {
-    ev.preventDefault();
-    msgBox.style.display = "none";
-
-    const nome = form.nome.value.trim();
-    const telefone = form.telefone.value.trim();
-    const servico_id = form.servico.value;
-
-    if (!nome || !telefone || !servico_id) {
-      showMsg("Preencha nome, celular e escolha um tipo de atendimento.", "erro");
-      return;
-    }
-
-    btnGerar.disabled = true;
-    btnGerar.textContent = "Gerando senha...";
-
-    try {
-      const body = {
-        nome,
-        telefone,
-        servico_id,
-        preferencial: chkPreferencial.checked,
-        tipo_preferencial: chkPreferencial.checked ? "declarado" : null,
-        geo: null
-      };
-
-      const res = await fetch(`${BASE_API}/filas/${slugLocal}/senha`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-
-      const dados = await res.json();
-
-      if (!res.ok) {
-        const texto = dados.mensagem || "Não foi possível gerar sua senha. Tente de novo.";
-        showMsg(texto, "erro");
-        return;
+          listaEl.innerHTML = `<ul>${itens}</ul>`;
+        }
+      } catch (err) {
+        console.error(err);
+        resumoEl.textContent = "Não foi possível carregar a fila.";
+        erroEl.textContent = "Falha ao consultar a API. Tente novamente em instantes.";
+        erroEl.style.display = "block";
       }
-
-      showMsg(
-        `Sua senha é o número ${dados.senha}. Aguarde sua chamada pela equipe da UBS.`,
-        "ok"
-      );
-      form.reset();
-    } catch (e) {
-      console.error(e);
-      showMsg("Erro de comunicação com o servidor. Tente novamente em instantes.", "erro");
-    } finally {
-      btnGerar.disabled = false;
-      btnGerar.textContent = "GERAR SENHA";
     }
-  });
-</script>
+
+    atualizarFilaPublica();
+    setInterval(atualizarFilaPublica, 5000);
+  </script>
 </body>
 </html>

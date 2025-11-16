@@ -4,33 +4,21 @@
   <meta charset="UTF-8" />
   <title>PegaSenha – UBS PB Carolina</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="/style.css" />
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #f3f4f6;
       margin: 0;
-      padding: 0;
-    }
-
-    .app {
-      max-width: 800px;
-      margin: 0 auto;
       padding: 16px;
-      text-align: center;
     }
-
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+    }
     h1 {
-      font-size: 1.5rem;
-      margin-bottom: 4px;
+      font-size: 1.3rem;
+      margin-bottom: 8px;
     }
-
-    .sub {
-      font-size: 0.95rem;
-      color: #4b5563;
-      margin-bottom: 16px;
-    }
-
     .card {
       background: #ffffff;
       border-radius: 12px;
@@ -38,47 +26,58 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
       margin-bottom: 16px;
     }
-
-    .fila-resumo {
+    button {
+      width: 100%;
+      padding: 12px;
       font-size: 1rem;
-      margin-bottom: 8px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 600;
     }
-
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+    .senha-grande {
+      font-size: 2.4rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 12px 0 4px;
+    }
+    .sucesso {
+      color: #16a34a;
+      font-size: 0.9rem;
+      text-align: center;
+    }
     .erro {
       color: #b91c1c;
       font-size: 0.9rem;
-      margin-top: 8px;
+      text-align: center;
     }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    li {
-      font-size: 0.9rem;
-      padding: 4px 0;
-      border-bottom: 1px solid #e5e7eb;
+    .info {
+      font-size: 0.85rem;
+      color: #4b5563;
+      text-align: center;
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <h1>UBS PB Carolina</h1>
-    <div class="sub">
-      Situação atual da fila (visualização pública, leitura apenas).
-    </div>
-
     <div class="card">
-      <div id="resumo" class="fila-resumo">Carregando fila...</div>
-      <div id="lista"></div>
-      <div id="erro" class="erro" style="display:none;"></div>
-    </div>
+      <h1>Retirada de Senha – UBS PB Carolina</h1>
+      <p class="info">
+        Toque no botão abaixo para gerar sua senha digital.
+      </p>
+      <button id="btn-pegar-senha" onclick="pegarSenha()">
+        Pegar senha
+      </button>
 
-    <div class="card" style="font-size:0.85rem; color:#4b5563;">
-      Em breve esta tela permitirá que você retire sua senha pelo celular.
-      Neste momento ela apenas mostra a fila em tempo real.
+      <div id="resultado" style="margin-top:16px;">
+        <!-- aqui aparece a senha -->
+      </div>
     </div>
   </div>
 
@@ -86,51 +85,57 @@
     const API_BASE = "https://pegasenha-api.vercel.app/api";
     const UBS_SLUG = "pb-carolina";
 
-    async function atualizarFilaPublica() {
-      const resumoEl = document.getElementById("resumo");
-      const listaEl = document.getElementById("lista");
-      const erroEl = document.getElementById("erro");
+    async function pegarSenha() {
+      const btn = document.getElementById("btn-pegar-senha");
+      const resultadoEl = document.getElementById("resultado");
 
-      erroEl.style.display = "none";
-      erroEl.textContent = "";
+      // limpa mensagens anteriores
+      resultadoEl.innerHTML = "";
+      btn.disabled = true;
+      btn.textContent = "Gerando senha...";
 
       try {
-        const resp = await fetch(`${API_BASE}/fila/${UBS_SLUG}`);
+        const resp = await fetch(`${API_BASE}/fila/${UBS_SLUG}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            servico_nome: "Atendimento Geral",
+            preferencial: false
+          }),
+        });
+
         if (!resp.ok) {
-          throw new Error("Status " + resp.status);
+          throw new Error("Falha ao gerar senha. Código " + resp.status);
         }
 
         const data = await resp.json();
-        const fila = Array.isArray(data.fila) ? data.fila : [];
-        const stats = data.stats || {};
-
-        resumoEl.innerHTML = `
-          Há <strong>${stats.aguardando ?? fila.length}</strong> pessoas aguardando.
-        `;
-
-        if (fila.length === 0) {
-          listaEl.innerHTML = "<p>Nenhuma senha na fila no momento.</p>";
-        } else {
-          const itens = fila.map((item, idx) => {
-            const tipoPref =
-              item.preferencial === true || item.preferencial === "true"
-                ? " (preferencial)"
-                : "";
-            return `<li>${idx + 1}º – Senha <strong>${item.numero}</strong>${tipoPref}</li>`;
-          }).join("");
-
-          listaEl.innerHTML = `<ul>${itens}</ul>`;
+        if (!data.ok || !data.senha) {
+          throw new Error("Resposta inesperada da API");
         }
-      } catch (err) {
-        console.error(err);
-        resumoEl.textContent = "Não foi possível carregar a fila.";
-        erroEl.textContent = "Falha ao consultar a API. Tente novamente em instantes.";
-        erroEl.style.display = "block";
+
+        const senha = data.senha;
+
+        resultadoEl.innerHTML = `
+          <div class="senha-grande">${senha.numero}</div>
+          <div class="sucesso">Sua senha foi gerada com sucesso.</div>
+          <div class="info">
+            Aguarde ser chamado pelo atendente.
+          </div>
+        `;
+      } catch (erro) {
+        console.error(erro);
+        resultadoEl.innerHTML = `
+          <div class="erro">
+            Não foi possível gerar sua senha agora. Tente novamente em instantes.
+          </div>
+        `;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Pegar senha";
       }
     }
-
-    atualizarFilaPublica();
-    setInterval(atualizarFilaPublica, 5000);
   </script>
 </body>
 </html>

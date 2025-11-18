@@ -1,13 +1,14 @@
 <!--
   PegaSenha - Painel do Host (Restaurante de Teste)
   Arquivo: comercial/restaurante-teste/index.html
-  Versão: 0.2.0
+  Versão: 0.3.0
   Data: 18/11/2025
   Descrição:
     - Visualiza fila de senhas do restaurante-teste.
     - Lista mesas livres (lugares + observação).
     - Permite registrar mesa livre.
-    - Permite atribuir uma mesa livre a uma senha da fila.
+    - Permite atribuir mesa a uma senha da fila.
+    - Permite marcar uma senha como "Atendida" ou "Ausente".
 -->
 
 <!DOCTYPE html>
@@ -124,6 +125,35 @@
       color: #111827;
     }
 
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+    }
+
+    .status-aguardando {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .status-chamada,
+    .status-na_mesa {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-atendida {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-ausente {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
     .erro {
       color: #b91c1c;
       font-size: 0.9rem;
@@ -197,6 +227,7 @@
       background: #e5e7eb;
       cursor: pointer;
       font-size: 0.8rem;
+      margin-right: 4px;
     }
 
     .btn-mini:active {
@@ -233,7 +264,7 @@
       <div>
         <h1>Host – Restaurante de Teste</h1>
         <p class="subtitle">
-          Fila de mesas e registro de mesas livres via PegaSenha.
+          Fila de mesas, mesas livres e status de atendimento via PegaSenha.
         </p>
       </div>
       <div class="status-bar">
@@ -307,6 +338,20 @@
     const API_BASE = "https://pegasenha-api.vercel.app/api";
     const UBS_SLUG = "restaurante-teste";
 
+    function formatarStatus(statusRaw) {
+      const s = (statusRaw || "aguardando").toString();
+      const classeBase = "status-pill status-" + s;
+      let texto = s;
+
+      if (s === "aguardando") texto = "Aguardando";
+      else if (s === "chamada") texto = "Chamada";
+      else if (s === "na_mesa") texto = "Na mesa";
+      else if (s === "atendida") texto = "Atendida";
+      else if (s === "ausente") texto = "Ausente";
+
+      return `<span class="${classeBase}">${texto}</span>`;
+    }
+
     async function carregarFila() {
       const erroEl = document.getElementById("erro-fila");
       const tabelaContainer = document.getElementById("tabela-container");
@@ -329,7 +374,7 @@
         const s = data.stats || {};
         statsEl.innerHTML = `
           <span>Total:<strong>${s.total ?? "-"}</strong></span>
-          <span>Aguardando:<strong>${s.aguardando ?? "-"}</strong></span>
+          <span>Em fila / chamados:<strong>${s.aguardando ?? "-"}</strong></span>
           <span>Atendidas:<strong>${s.atendidas ?? "-"}</strong></span>
           <span>Ausentes:<strong>${s.ausentes ?? "-"}</strong></span>
         `;
@@ -351,14 +396,34 @@
                 })
               : "-";
 
+            const statusHtml = formatarStatus(item.status);
+
+            const podeMarcar =
+              item.status !== "atendida" && item.status !== "ausente";
+
+            const botoes =
+              podeMarcar
+                ? `
+                  <button class="btn-mini"
+                    onclick="atualizarStatus(${item.id_interno}, 'atendida')">
+                    Atendida
+                  </button>
+                  <button class="btn-mini"
+                    onclick="atualizarStatus(${item.id_interno}, 'ausente')">
+                    Ausente
+                  </button>
+                `
+                : '<span class="small">Concluída</span>';
+
             return `
               <tr>
                 <td>${index + 1}</td>
                 <td><strong>${item.numero}</strong></td>
                 <td>${qtdPessoas}</td>
                 <td><span class="${badgeClass}">${tipo}</span></td>
-                <td>${item.status || "aguardando"}</td>
+                <td>${statusHtml}</td>
                 <td>${criadoEm}</td>
+                <td>${botoes}</td>
               </tr>
             `;
           }).join("");
@@ -373,6 +438,7 @@
                   <th>Tipo</th>
                   <th>Status</th>
                   <th>Criado em</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -437,7 +503,6 @@
         const data = await resp.json();
         const mesas = Array.isArray(data.mesas_livres) ? data.mesas_livres : [];
 
-        // Precisamos também da fila para sugerir senhas compatíveis
         const respFila = await fetch(`${API_BASE}/fila/${UBS_SLUG}`);
         const dataFila = await respFila.json();
         const fila = Array.isArray(dataFila.fila) ? dataFila.fila : [];
@@ -450,182 +515,3 @@
         const linhas = mesas.map((mesa) => {
           const criadoEm = mesa.criado_em
             ? new Date(mesa.criado_em).toLocaleTimeString("pt-BR", {
-                hour: "2-digit",
-                minute: "2-digit"
-              })
-            : "-";
-
-          // Filtra senhas compatíveis: qtd_pessoas <= lugares
-          const opcoes = fila.filter((s) => {
-            if (s.qtd_pessoas == null) return false;
-            return Number(s.qtd_pessoas) <= Number(mesa.lugares);
-          });
-
-          const optionsHtml =
-            opcoes.length === 0
-              ? '<option value="">Nenhuma senha compatível</option>'
-              : '<option value="">Escolha a senha...</option>' +
-                opcoes
-                  .map(
-                    (s) =>
-                      `<option value="${s.id_interno}">${s.numero} - ${s.qtd_pessoas} pessoa(s)</option>`
-                  )
-                  .join("");
-
-          return `
-            <tr>
-              <td>${mesa.id}</td>
-              <td>${mesa.lugares}</td>
-              <td>${mesa.observacao || "-"}</td>
-              <td>${criadoEm}</td>
-              <td>
-                <select
-                  id="select-senha-mesa-${mesa.id}"
-                  class="select-mini"
-                >
-                  ${optionsHtml}
-                </select>
-              </td>
-              <td>
-                <button class="btn-mini" onclick="atribuirMesa(${mesa.id})">
-                  Atribuir
-                </button>
-              </td>
-            </tr>
-          `;
-        }).join("");
-
-        tabelaMesas.innerHTML = `
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Lugares</th>
-                <th>Observação</th>
-                <th>Registrada em</th>
-                <th>Senha</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${linhas}
-            </tbody>
-          </table>
-        `;
-      } catch (err) {
-        console.error(err);
-        erroEl.textContent = "Erro ao consultar a API de mesas. Tente novamente em alguns instantes.";
-        erroEl.style.display = "block";
-        tabelaMesas.innerHTML = "<p>Não foi possível carregar as mesas.</p>";
-      }
-    }
-
-    async function registrarMesa(event) {
-      event.preventDefault();
-      const lugaresInput = document.getElementById("lugares");
-      const observacaoInput = document.getElementById("observacao");
-      const erroEl = document.getElementById("erro-mesas");
-
-      erroEl.style.display = "none";
-      erroEl.textContent = "";
-
-      const lugares = Number(lugaresInput.value || 0);
-      const observacao = observacaoInput.value || "";
-
-      if (!lugares || lugares <= 0) {
-        erroEl.textContent = "Informe a quantidade de lugares (número maior que zero).";
-        erroEl.style.display = "block";
-        return;
-      }
-
-      try {
-        const resp = await fetch(`${API_BASE}/mesas/${UBS_SLUG}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            acao: "registrar",
-            lugares,
-            observacao,
-          }),
-        });
-
-        if (!resp.ok) {
-          const texto = await resp.text();
-          throw new Error("Erro ao registrar mesa: " + texto);
-        }
-
-        // Limpa formulário e recarrega mesas
-        lugaresInput.value = "";
-        observacaoInput.value = "";
-        await carregarMesas();
-      } catch (err) {
-        console.error(err);
-        erroEl.textContent =
-          "Não foi possível registrar a mesa. Tente novamente em instantes.";
-        erroEl.style.display = "block";
-      }
-    }
-
-    async function atribuirMesa(mesaId) {
-      const select = document.getElementById(`select-senha-mesa-${mesaId}`);
-      const erroEl = document.getElementById("erro-mesas");
-
-      erroEl.style.display = "none";
-      erroEl.textContent = "";
-
-      if (!select) {
-        erroEl.textContent = "Não foi possível localizar o seletor de senhas.";
-        erroEl.style.display = "block";
-        return;
-      }
-
-      const senhaId = Number(select.value || 0);
-      if (!senhaId) {
-        erroEl.textContent = "Escolha uma senha compatível antes de atribuir a mesa.";
-        erroEl.style.display = "block";
-        return;
-      }
-
-      try {
-        const resp = await fetch(`${API_BASE}/mesas/${UBS_SLUG}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            acao: "atribuir",
-            mesa_id: mesaId,
-            senha_id: senhaId,
-          }),
-        });
-
-        if (!resp.ok) {
-          const texto = await resp.text();
-          throw new Error("Erro ao atribuir mesa: " + texto);
-        }
-
-        // Recarrega fila e mesas
-        await carregarFila();
-        await carregarMesas();
-      } catch (err) {
-        console.error(err);
-        erroEl.textContent =
-          "Não foi possível atribuir a mesa. Tente novamente em instantes.";
-        erroEl.style.display = "block";
-      }
-    }
-
-    // expõe função no escopo global para uso no onclick
-    window.atribuirMesa = atribuirMesa;
-
-    // Inicializa
-    document.getElementById("form-mesa").addEventListener("submit", registrarMesa);
-
-    async function atualizarTudo() {
-      await carregarFila();
-      await carregarMesas();
-    }
-
-    atualizarTudo();
-    setInterval(atualizarTudo, 5000);
-  </script>
-</body>
-</html>

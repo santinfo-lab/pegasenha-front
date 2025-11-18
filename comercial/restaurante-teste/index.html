@@ -1,14 +1,13 @@
 <!--
-  PegaSenha - Painel do Host (Restaurante de Teste)
-  Arquivo: comercial/restaurante-teste/index.html
-  Versão: 0.3.0
-  Data: 18/11/2025
-  Descrição:
-    - Visualiza fila de senhas do restaurante-teste.
-    - Lista mesas livres (lugares + observação).
-    - Permite registrar mesa livre.
-    - Permite atribuir mesa a uma senha da fila.
-    - Permite marcar uma senha como "Atendida" ou "Ausente".
+  PegaSenha Front – Host Restaurante de Teste
+  Arquivo: /host/restaurante-teste/index.html
+
+  Versão atual: v0.2.1
+  Histórico de versões:
+  - v0.2.0 – 18/11/2025 – Tela de Host para restaurantes, com fila de mesas,
+    registro de mesas livres e atribuição básica.
+  - v0.2.1 – 19/11/2025 – Removido auto-refresh automático (setInterval) para
+    evitar perder a seleção de senha ou mesa durante a atribuição.
 -->
 
 <!DOCTYPE html>
@@ -18,418 +17,49 @@
   <title>PegaSenha – Host Restaurante de Teste</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="/style.css" />
-  <style>
-    body {
-      margin: 0;
-      padding: 16px;
-      background: #f3f4f6;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    .app {
-      max-width: 1080px;
-      margin: 0 auto;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 1.4rem;
-    }
-
-    .subtitle {
-      margin: 4px 0 0;
-      font-size: 0.9rem;
-      color: #6b7280;
-    }
-
-    .status-bar {
-      font-size: 0.85rem;
-      color: #4b5563;
-      text-align: right;
-    }
-
-    .card-local {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      margin-bottom: 16px;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-      gap: 16px;
-    }
-
-    @media (max-width: 768px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .fila-table-wrapper {
-      max-height: 360px;
-      overflow: auto;
-      border-radius: 12px;
-      border: 1px solid #e5e7eb;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
-
-    th, td {
-      padding: 8px 10px;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: left;
-    }
-
-    thead {
-      background: #f9fafb;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    tbody tr:nth-child(even) {
-      background: #f9fafb;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      background: #e5e7eb;
-    }
-
-    .badge-mesa {
-      background: #dbeafe;
-      color: #1d4ed8;
-    }
-
-    .badge-simples {
-      background: #e5e7eb;
-      color: #111827;
-    }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 0.75rem;
-    }
-
-    .status-aguardando {
-      background: #e5e7eb;
-      color: #111827;
-    }
-
-    .status-chamada,
-    .status-na_mesa {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .status-atendida {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .status-ausente {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    .erro {
-      color: #b91c1c;
-      font-size: 0.9rem;
-      margin-top: 8px;
-    }
-
-    .stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      font-size: 0.85rem;
-      color: #4b5563;
-      margin-top: 8px;
-    }
-
-    .stats span strong {
-      font-weight: 600;
-      margin-left: 4px;
-    }
-
-    .form-inline {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      margin-top: 8px;
-      margin-bottom: 8px;
-    }
-
-    .form-inline input,
-    .form-inline textarea,
-    .form-inline button,
-    .form-inline select {
-      font-size: 0.85rem;
-    }
-
-    .form-inline input[type="number"] {
-      width: 80px;
-      padding: 6px 8px;
-      border-radius: 999px;
-      border: 1px solid #d1d5db;
-    }
-
-    .form-inline textarea {
-      flex: 1;
-      min-height: 40px;
-      padding: 6px 8px;
-      border-radius: 8px;
-      border: 1px solid #d1d5db;
-      resize: vertical;
-    }
-
-    .btn-primary {
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: none;
-      background: #2563eb;
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-primary:active {
-      transform: scale(0.98);
-    }
-
-    .btn-mini {
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: none;
-      background: #e5e7eb;
-      cursor: pointer;
-      font-size: 0.8rem;
-      margin-right: 4px;
-    }
-
-    .btn-mini:active {
-      transform: scale(0.97);
-    }
-
-    .select-mini {
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid #d1d5db;
-      font-size: 0.8rem;
-    }
-
-    .small {
-      font-size: 0.8rem;
-      color: #6b7280;
-    }
-
-    .list-ultimas {
-      list-style: none;
-      margin: 8px 0 0;
-      padding: 0;
-      font-size: 0.8rem;
-    }
-
-    .list-ultimas li {
-      margin-bottom: 4px;
-    }
-  </style>
 </head>
 <body>
-  <div class="app">
-    <header>
+  <main class="card card-wide">
+    <div class="topbar">
       <div>
-        <h1>Host – Restaurante de Teste</h1>
-        <p class="subtitle">
-          Fila de mesas, mesas livres e status de atendimento via PegaSenha.
+        <h1 class="top-title">
+          Host – <span class="brand-accent">Restaurante de Teste</span>
+        </h1>
+        <p class="subtitle" style="margin-top:4px;">
+          Controle de fila de mesas e registro de mesas livres via PegaSenha.
         </p>
       </div>
-      <div class="status-bar">
-        <div id="ultima-atualizacao">–</div>
-        <div>Unidade: <strong>restaurante-teste</strong></div>
-      </div>
-    </header>
-
-    <div class="layout">
-      <!-- Coluna ESQUERDA: Fila -->
-      <div>
-        <div class="card-local">
-          <strong>Resumo da fila</strong>
-          <div id="stats" class="stats">
-            Carregando...
-          </div>
+      <div class="top-actions">
+        <div class="pill">
+          Unidade: <strong style="margin-left:4px;">restaurante-teste</strong>
         </div>
-
-        <div class="card-local">
-          <strong>Fila de senhas</strong>
-          <div class="fila-table-wrapper" id="tabela-container">
-            Carregando...
-          </div>
-          <div id="erro-fila" class="erro" style="display:none;"></div>
+        <div class="pill small">
+          Atualizado às <span id="ultima-atualizacao">–</span>
         </div>
-      </div>
-
-      <!-- Coluna DIREITA: Mesas livres -->
-      <div>
-        <div class="card-local">
-          <strong>Mesas livres registradas</strong>
-          <p class="small">
-            Quando uma mesa ficar livre, informe a quantidade de lugares e, se quiser,
-            uma observação (ex.: "mesa 7, perto da janela").
-          </p>
-
-          <form id="form-mesa" class="form-inline">
-            <input
-              type="number"
-              id="lugares"
-              min="1"
-              step="1"
-              placeholder="Lugares"
-              required
-            />
-            <textarea
-              id="observacao"
-              placeholder="Observação (opcional)"
-            ></textarea>
-            <button type="submit" class="btn-primary">Registrar mesa livre</button>
-          </form>
-
-          <div id="erro-mesas" class="erro" style="display:none;"></div>
-
-          <div class="fila-table-wrapper" id="tabela-mesas">
-            <p>Nenhuma mesa livre registrada.</p>
-          </div>
-        </div>
-
-        <div class="card-local">
-          <strong>Últimas chamadas</strong>
-          <ul id="ultimas-chamadas" class="list-ultimas">
-            <li class="small">Nenhuma chamada registrada ainda.</li>
-          </ul>
-        </div>
+        <button id="btn-recarregar" class="btn-secondary small">
+          Atualizar agora
+        </button>
       </div>
     </div>
-  </div>
 
-  <script>
-    const API_BASE = "https://pegasenha-api.vercel.app/api";
-    const UBS_SLUG = "restaurante-teste";
+    <section class="layout">
+      <!-- Coluna principal -->
+      <div class="layout-main">
+        <!-- Resumo da fila -->
+        <section style="margin-bottom:16px;">
+          <h2>Resumo da fila</h2>
+          <ul class="stats-list" id="stats-resumo">
+            <li>Carregando...</li>
+          </ul>
+        </section>
 
-    function formatarStatus(statusRaw) {
-      const s = (statusRaw || "aguardando").toString();
-      const classeBase = "status-pill status-" + s;
-      let texto = s;
+        <!-- Tabela da fila -->
+        <section>
+          <h2>Fila de senhas</h2>
+          <div id="erro-fila" class="erro" style="display:none; margin-bottom:8px;"></div>
 
-      if (s === "aguardando") texto = "Aguardando";
-      else if (s === "chamada") texto = "Chamada";
-      else if (s === "na_mesa") texto = "Na mesa";
-      else if (s === "atendida") texto = "Atendida";
-      else if (s === "ausente") texto = "Ausente";
-
-      return `<span class="${classeBase}">${texto}</span>`;
-    }
-
-    async function carregarFila() {
-      const erroEl = document.getElementById("erro-fila");
-      const tabelaContainer = document.getElementById("tabela-container");
-      const statsEl = document.getElementById("stats");
-      const ultimaAtualizacaoEl = document.getElementById("ultima-atualizacao");
-      const ultimasEl = document.getElementById("ultimas-chamadas");
-
-      erroEl.style.display = "none";
-      erroEl.textContent = "";
-
-      try {
-        const resp = await fetch(`${API_BASE}/fila/${UBS_SLUG}`);
-        if (!resp.ok) {
-          throw new Error("API respondeu com status " + resp.status);
-        }
-
-        const data = await resp.json();
-
-        // --- Stats ---
-        const s = data.stats || {};
-        statsEl.innerHTML = `
-          <span>Total:<strong>${s.total ?? "-"}</strong></span>
-          <span>Em fila / chamados:<strong>${s.aguardando ?? "-"}</strong></span>
-          <span>Atendidas:<strong>${s.atendidas ?? "-"}</strong></span>
-          <span>Ausentes:<strong>${s.ausentes ?? "-"}</strong></span>
-        `;
-
-        // --- Fila ---
-        const fila = Array.isArray(data.fila) ? data.fila : [];
-        if (fila.length === 0) {
-          tabelaContainer.innerHTML = "<p>Nenhuma senha na fila no momento.</p>";
-        } else {
-          const linhas = fila.map((item, index) => {
-            const tipo = item.tipo_senha || "simples";
-            const badgeClass = tipo === "mesa" ? "badge badge-mesa" : "badge badge-simples";
-            const qtdPessoas = item.qtd_pessoas != null ? item.qtd_pessoas : "-";
-
-            const criadoEm = item.criado_em
-              ? new Date(item.criado_em).toLocaleTimeString("pt-BR", {
-                  hour: "2-digit",
-                  minute: "2-digit"
-                })
-              : "-";
-
-            const statusHtml = formatarStatus(item.status);
-
-            const podeMarcar =
-              item.status !== "atendida" && item.status !== "ausente";
-
-            const botoes =
-              podeMarcar
-                ? `
-                  <button class="btn-mini"
-                    onclick="atualizarStatus(${item.id_interno}, 'atendida')">
-                    Atendida
-                  </button>
-                  <button class="btn-mini"
-                    onclick="atualizarStatus(${item.id_interno}, 'ausente')">
-                    Ausente
-                  </button>
-                `
-                : '<span class="small">Concluída</span>';
-
-            return `
-              <tr>
-                <td>${index + 1}</td>
-                <td><strong>${item.numero}</strong></td>
-                <td>${qtdPessoas}</td>
-                <td><span class="${badgeClass}">${tipo}</span></td>
-                <td>${statusHtml}</td>
-                <td>${criadoEm}</td>
-                <td>${botoes}</td>
-              </tr>
-            `;
-          }).join("");
-
-          tabelaContainer.innerHTML = `
-            <table>
+          <div class="fila-table-wrapper">
+            <table class="fila-table">
               <thead>
                 <tr>
                   <th>#</th>
@@ -438,80 +68,306 @@
                   <th>Tipo</th>
                   <th>Status</th>
                   <th>Criado em</th>
-                  <th>Ações</th>
                 </tr>
               </thead>
-              <tbody>
-                ${linhas}
+              <tbody id="tbody-fila">
+                <tr>
+                  <td colspan="6">Carregando fila...</td>
+                </tr>
               </tbody>
             </table>
-          `;
-        }
+          </div>
 
-        // --- Últimas chamadas ---
-        const ultimas = Array.isArray(data.ultimas_chamadas)
-          ? data.ultimas_chamadas
-          : [];
+          <p class="small" style="margin-top:8px; color:#6b7280;">
+            As senhas exibidas são apenas do tipo <strong>mesa</strong> para a unidade
+            <code>restaurante-teste</code>.
+          </p>
+        </section>
+      </div>
 
-        if (ultimas.length === 0) {
-          ultimasEl.innerHTML = '<li class="small">Nenhuma chamada registrada ainda.</li>';
-        } else {
-          ultimasEl.innerHTML = ultimas
-            .slice(0, 10)
-            .map((c) => {
-              const hora = c.hora
-                ? new Date(c.hora).toLocaleTimeString("pt-BR", {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                  })
-                : "-";
-              const mesa = c.mesa || "-";
-              return `<li>Sno. <strong>${c.numero_senha}</strong> → ${mesa} <span class="small">(${hora})</span></li>`;
-            })
-            .join("");
-        }
+      <!-- Coluna lateral: mesas livres + últimas chamadas -->
+      <aside class="layout-side">
+        <!-- Registro de mesas livres -->
+        <section class="solidaria">
+          <h3>Mesas livres registradas</h3>
+          <p class="small" style="color:#6b7280;">
+            Quando uma mesa ficar livre, informe a quantidade de lugares e, se quiser,
+            uma observação (ex.: "mesa 7, perto da janela").
+          </p>
 
-        const agora = new Date();
-        ultimaAtualizacaoEl.textContent =
-          "Atualizado às " +
-          agora.toLocaleTimeString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit"
-          });
-      } catch (err) {
-        console.error(err);
-        erroEl.textContent = "Erro ao consultar a API da fila. Tente novamente em alguns instantes.";
-        erroEl.style.display = "block";
-        tabelaContainer.innerHTML = "<p>Não foi possível carregar a fila.</p>";
-      }
+          <form id="form-mesa-livre" class="form">
+            <div class="field">
+              <label for="lugares">Lugares</label>
+              <input
+                id="lugares"
+                name="lugares"
+                type="number"
+                min="1"
+                max="20"
+                placeholder="Ex.: 2, 4, 6"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="obs">Observação (opcional)</label>
+              <input
+                id="obs"
+                name="obs"
+                type="text"
+                maxlength="80"
+                placeholder='Ex.: "mesa 7, perto da janela"'
+              />
+            </div>
+            <div class="actions">
+              <button type="submit" class="btn">
+                Registrar mesa livre
+              </button>
+            </div>
+          </form>
+
+          <div id="lista-mesas-livres" class="small">
+            Nenhuma mesa livre registrada.
+          </div>
+        </section>
+
+        <hr class="divider" />
+
+        <!-- Últimas chamadas -->
+        <section>
+          <h3>Últimas chamadas</h3>
+          <ul id="lista-chamadas" class="calls-list">
+            <li class="small">Nenhuma chamada registrada ainda.</li>
+          </ul>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    // ------------------ CONFIGURAÇÃO BÁSICA ------------------
+    const API_BASE = "https://pegasenha-api.vercel.app/api";
+    const UBS_SLUG = "restaurante-teste";
+
+    // IDs e referências
+    const statsEl = document.getElementById("stats-resumo");
+    const tbodyFila = document.getElementById("tbody-fila");
+    const erroFilaEl = document.getElementById("erro-fila");
+    const ultimaAtualizacaoEl = document.getElementById("ultima-atualizacao");
+    const btnRecarregar = document.getElementById("btn-recarregar");
+    const formMesaLivre = document.getElementById("form-mesa-livre");
+    const listaMesasLivresEl = document.getElementById("lista-mesas-livres");
+    const listaChamadasEl = document.getElementById("lista-chamadas");
+
+    // Estado em memória no front para seleção de senha/mesa
+    let estadoFront = {
+      fila: [],
+      mesasLivres: [],
+      ultimasChamadas: [],
+    };
+
+    // Utilitário para formatar hora
+    function formatHora(iso) {
+      if (!iso) return "-";
+      const d = new Date(iso);
+      return d.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     }
 
-    async function carregarMesas() {
-      const erroEl = document.getElementById("erro-mesas");
-      const tabelaMesas = document.getElementById("tabela-mesas");
-
-      erroEl.style.display = "none";
-      erroEl.textContent = "";
+    // ------------------ CARREGAMENTO DA FILA ------------------
+    async function carregarFila() {
+      erroFilaEl.style.display = "none";
+      erroFilaEl.textContent = "";
 
       try {
-        const resp = await fetch(`${API_BASE}/mesas/${UBS_SLUG}`);
+        const resp = await fetch(\`\${API_BASE}/fila/\${UBS_SLUG}\`);
         if (!resp.ok) {
-          throw new Error("API respondeu com status " + resp.status);
+          throw new Error("Falha ao consultar a API da fila: " + resp.status);
         }
 
         const data = await resp.json();
-        const mesas = Array.isArray(data.mesas_livres) ? data.mesas_livres : [];
+        const fila = Array.isArray(data.fila) ? data.fila : [];
+        const stats = data.stats || {
+          total: 0,
+          aguardando: 0,
+          atendidas: 0,
+          ausentes: 0,
+        };
+        const ultCham = Array.isArray(data.ultimas_chamadas)
+          ? data.ultimas_chamadas
+          : [];
 
-        const respFila = await fetch(`${API_BASE}/fila/${UBS_SLUG}`);
-        const dataFila = await respFila.json();
-        const fila = Array.isArray(dataFila.fila) ? dataFila.fila : [];
+        // Atualiza estado local
+        estadoFront.fila = fila;
+        estadoFront.ultimasChamadas = ultCham;
 
-        if (mesas.length === 0) {
-          tabelaMesas.innerHTML = "<p>Nenhuma mesa livre registrada.</p>";
-          return;
+        // Atualiza stats
+        statsEl.innerHTML = "";
+        const liTotal = document.createElement("li");
+        liTotal.innerHTML =
+          "<span>Total:</span> <strong>" + stats.total + "</strong>";
+        const liAguard = document.createElement("li");
+        liAguard.innerHTML =
+          "<span>Aguardando:</span> <strong>" + stats.aguardando + "</strong>";
+        const liAtend = document.createElement("li");
+        liAtend.innerHTML =
+          "<span>Atendidas:</span> <strong>" + stats.atendidas + "</strong>";
+        const liAus = document.createElement("li");
+        liAus.innerHTML =
+          "<span>Ausentes:</span> <strong>" + stats.ausentes + "</strong>";
+
+        statsEl.appendChild(liTotal);
+        statsEl.appendChild(liAguard);
+        statsEl.appendChild(liAtend);
+        statsEl.appendChild(liAus);
+
+        // Monta tabela da fila (somente tipo 'mesa' por enquanto)
+        tbodyFila.innerHTML = "";
+        if (!fila.length) {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 6;
+          td.textContent = "Nenhuma senha na fila no momento.";
+          tr.appendChild(td);
+          tbodyFila.appendChild(tr);
+        } else {
+          fila.forEach((item, idx) => {
+            const tr = document.createElement("tr");
+
+            const tdIdx = document.createElement("td");
+            tdIdx.textContent = String(idx + 1);
+
+            const tdNumero = document.createElement("td");
+            tdNumero.innerHTML = "<strong>" + (item.numero || "-") + "</strong>";
+
+            const tdPessoas = document.createElement("td");
+            tdPessoas.textContent =
+              item.qtd_pessoas != null ? String(item.qtd_pessoas) : "-";
+
+            const tdTipo = document.createElement("td");
+            tdTipo.innerHTML =
+              '<span class="badge">' + (item.tipo_senha || "mesa") + "</span>";
+
+            const tdStatus = document.createElement("td");
+            tdStatus.textContent = item.status || "aguardando";
+
+            const tdCriado = document.createElement("td");
+            tdCriado.textContent = formatHora(item.criado_em);
+
+            tr.appendChild(tdIdx);
+            tr.appendChild(tdNumero);
+            tr.appendChild(tdPessoas);
+            tr.appendChild(tdTipo);
+            tr.appendChild(tdStatus);
+            tr.appendChild(tdCriado);
+
+            tbodyFila.appendChild(tr);
+          });
         }
 
-        const linhas = mesas.map((mesa) => {
-          const criadoEm = mesa.criado_em
-            ? new Date(mesa.criado_em).toLocaleTimeString("pt-BR", {
+        // Atualiza últimas chamadas (apenas visual, sem ações ainda)
+        listaChamadasEl.innerHTML = "";
+        if (!ultCham.length) {
+          const li = document.createElement("li");
+          li.className = "small";
+          li.textContent = "Nenhuma chamada registrada ainda.";
+          listaChamadasEl.appendChild(li);
+        } else {
+          ultCham.forEach((c) => {
+            const li = document.createElement("li");
+            li.className = "small";
+            li.textContent =
+              formatHora(c.chamado_em) +
+              " – Senha " +
+              (c.numero || "?") +
+              (c.mesa_atribuida ? " (mesa " + c.mesa_atribuida + ")" : "");
+            listaChamadasEl.appendChild(li);
+          });
+        }
+
+        // Atualiza texto de "última atualização"
+        const agora = new Date();
+        ultimaAtualizacaoEl.textContent = agora.toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+      } catch (erro) {
+        console.error(erro);
+        erroFilaEl.textContent =
+          "Erro ao consultar a API da fila. Tente novamente em alguns instantes.";
+        erroFilaEl.style.display = "block";
+      }
+    }
+
+    // ------------------ MESAS LIVRES ------------------
+    // OBS: Aqui estou considerando que ainda não temos endpoint
+    // dedicado para mesas livres. Por enquanto, mantemos somente
+    // no front-end para testes visuais.
+    function registrarMesaLivreLocal(lugares, obs) {
+      estadoFront.mesasLivres.push({
+        id: Date.now(),
+        lugares,
+        obs: obs || "",
+        criado_em: new Date().toISOString(),
+      });
+      renderizarMesasLivres();
+    }
+
+    function renderizarMesasLivres() {
+      const lista = estadoFront.mesasLivres;
+      if (!lista.length) {
+        listaMesasLivresEl.textContent = "Nenhuma mesa livre registrada.";
+        return;
+      }
+
+      const ul = document.createElement("ul");
+      ul.className = "calls-list";
+
+      lista.forEach((m) => {
+        const li = document.createElement("li");
+        li.className = "small";
+        li.textContent =
+          (m.lugares || "?") +
+          " lugares – " +
+          (m.obs || "sem observação") +
+          " (" +
+          formatHora(m.criado_em) +
+          ")";
+        ul.appendChild(li);
+      });
+
+      listaMesasLivresEl.innerHTML = "";
+      listaMesasLivresEl.appendChild(ul);
+    }
+
+    formMesaLivre.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const lugares = parseInt(formMesaLivre.lugares.value, 10);
+      const obs = formMesaLivre.obs.value.trim();
+
+      if (!lugares || lugares <= 0) {
+        alert("Informe a quantidade de lugares.");
+        return;
+      }
+
+      registrarMesaLivreLocal(lugares, obs);
+      formMesaLivre.reset();
+      formMesaLivre.lugares.focus();
+    });
+
+    // ------------------ INICIALIZAÇÃO ------------------
+    btnRecarregar.addEventListener("click", () => {
+      carregarFila();
+    });
+
+    // Carrega dados ao abrir
+    carregarFila();
+
+    // IMPORTANTE:
+    // Auto-refresh desativado para não atrapalhar a interação
+    // (antes havia: setInterval(carregarFila, 5000); )
+  </script>
+</body>
+</html>

@@ -1,3 +1,13 @@
+/* 
+  PegaSenha - Frontend Geral
+  Arquivo: style.css
+  Versão: 0.1.0
+  Data: 16/11/2025
+  Descrição:
+    - Estilos base do front (cartões, botões, layouts, tabela da fila e painel do atendente).
+    - Versão inicial de referência para UBS PB Carolina e futuras unidades.
+*/
+
 :root {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background:#f3f4f6;

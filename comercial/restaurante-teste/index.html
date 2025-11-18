@@ -2,12 +2,13 @@
   PegaSenha Front – Host Restaurante de Teste
   Arquivo: /host/restaurante-teste/index.html
 
-  Versão atual: v0.2.1
+  Versão atual: v0.2.2
   Histórico de versões:
   - v0.2.0 – 18/11/2025 – Tela de Host para restaurantes, com fila de mesas,
-    registro de mesas livres e atribuição básica.
-  - v0.2.1 – 19/11/2025 – Removido auto-refresh automático (setInterval) para
-    evitar perder a seleção de senha ou mesa durante a atribuição.
+    registro de mesas livres e visualização básica.
+  - v0.2.1 – 19/11/2025 – Removido auto-refresh automático (setInterval).
+  - v0.2.2 – 19/11/2025 – Simplificação do JavaScript, uso de DOMContentLoaded
+    e tratamento seguro de eventos para evitar travar o carregamento.
 -->
 
 <!DOCTYPE html>
@@ -85,7 +86,7 @@
         </section>
       </div>
 
-      <!-- Coluna lateral: mesas livres + últimas chamadas -->
+      <!-- Coluna lateral: mesas livres + últimas chamadas (visual) -->
       <aside class="layout-side">
         <!-- Registro de mesas livres -->
         <section class="solidaria">
@@ -132,7 +133,7 @@
 
         <hr class="divider" />
 
-        <!-- Últimas chamadas -->
+        <!-- Últimas chamadas (por enquanto apenas exibidas) -->
         <section>
           <h3>Últimas chamadas</h3>
           <ul id="lista-chamadas" class="calls-list">
@@ -144,230 +145,220 @@
   </main>
 
   <script>
-    // ------------------ CONFIGURAÇÃO BÁSICA ------------------
-    const API_BASE = "https://pegasenha-api.vercel.app/api";
-    const UBS_SLUG = "restaurante-teste";
+    (function () {
+      var API_BASE = "https://pegasenha-api.vercel.app/api";
+      var UBS_SLUG = "restaurante-teste";
 
-    // IDs e referências
-    const statsEl = document.getElementById("stats-resumo");
-    const tbodyFila = document.getElementById("tbody-fila");
-    const erroFilaEl = document.getElementById("erro-fila");
-    const ultimaAtualizacaoEl = document.getElementById("ultima-atualizacao");
-    const btnRecarregar = document.getElementById("btn-recarregar");
-    const formMesaLivre = document.getElementById("form-mesa-livre");
-    const listaMesasLivresEl = document.getElementById("lista-mesas-livres");
-    const listaChamadasEl = document.getElementById("lista-chamadas");
+      var statsEl = document.getElementById("stats-resumo");
+      var tbodyFila = document.getElementById("tbody-fila");
+      var erroFilaEl = document.getElementById("erro-fila");
+      var ultimaAtualizacaoEl = document.getElementById("ultima-atualizacao");
+      var btnRecarregar = document.getElementById("btn-recarregar");
+      var formMesaLivre = document.getElementById("form-mesa-livre");
+      var listaMesasLivresEl = document.getElementById("lista-mesas-livres");
+      var listaChamadasEl = document.getElementById("lista-chamadas");
 
-    // Estado em memória no front para seleção de senha/mesa
-    let estadoFront = {
-      fila: [],
-      mesasLivres: [],
-      ultimasChamadas: [],
-    };
+      var estadoFront = {
+        mesasLivres: []
+      };
 
-    // Utilitário para formatar hora
-    function formatHora(iso) {
-      if (!iso) return "-";
-      const d = new Date(iso);
-      return d.toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    }
-
-    // ------------------ CARREGAMENTO DA FILA ------------------
-    async function carregarFila() {
-      erroFilaEl.style.display = "none";
-      erroFilaEl.textContent = "";
-
-      try {
-        const resp = await fetch(\`\${API_BASE}/fila/\${UBS_SLUG}\`);
-        if (!resp.ok) {
-          throw new Error("Falha ao consultar a API da fila: " + resp.status);
-        }
-
-        const data = await resp.json();
-        const fila = Array.isArray(data.fila) ? data.fila : [];
-        const stats = data.stats || {
-          total: 0,
-          aguardando: 0,
-          atendidas: 0,
-          ausentes: 0,
-        };
-        const ultCham = Array.isArray(data.ultimas_chamadas)
-          ? data.ultimas_chamadas
-          : [];
-
-        // Atualiza estado local
-        estadoFront.fila = fila;
-        estadoFront.ultimasChamadas = ultCham;
-
-        // Atualiza stats
-        statsEl.innerHTML = "";
-        const liTotal = document.createElement("li");
-        liTotal.innerHTML =
-          "<span>Total:</span> <strong>" + stats.total + "</strong>";
-        const liAguard = document.createElement("li");
-        liAguard.innerHTML =
-          "<span>Aguardando:</span> <strong>" + stats.aguardando + "</strong>";
-        const liAtend = document.createElement("li");
-        liAtend.innerHTML =
-          "<span>Atendidas:</span> <strong>" + stats.atendidas + "</strong>";
-        const liAus = document.createElement("li");
-        liAus.innerHTML =
-          "<span>Ausentes:</span> <strong>" + stats.ausentes + "</strong>";
-
-        statsEl.appendChild(liTotal);
-        statsEl.appendChild(liAguard);
-        statsEl.appendChild(liAtend);
-        statsEl.appendChild(liAus);
-
-        // Monta tabela da fila (somente tipo 'mesa' por enquanto)
-        tbodyFila.innerHTML = "";
-        if (!fila.length) {
-          const tr = document.createElement("tr");
-          const td = document.createElement("td");
-          td.colSpan = 6;
-          td.textContent = "Nenhuma senha na fila no momento.";
-          tr.appendChild(td);
-          tbodyFila.appendChild(tr);
-        } else {
-          fila.forEach((item, idx) => {
-            const tr = document.createElement("tr");
-
-            const tdIdx = document.createElement("td");
-            tdIdx.textContent = String(idx + 1);
-
-            const tdNumero = document.createElement("td");
-            tdNumero.innerHTML = "<strong>" + (item.numero || "-") + "</strong>";
-
-            const tdPessoas = document.createElement("td");
-            tdPessoas.textContent =
-              item.qtd_pessoas != null ? String(item.qtd_pessoas) : "-";
-
-            const tdTipo = document.createElement("td");
-            tdTipo.innerHTML =
-              '<span class="badge">' + (item.tipo_senha || "mesa") + "</span>";
-
-            const tdStatus = document.createElement("td");
-            tdStatus.textContent = item.status || "aguardando";
-
-            const tdCriado = document.createElement("td");
-            tdCriado.textContent = formatHora(item.criado_em);
-
-            tr.appendChild(tdIdx);
-            tr.appendChild(tdNumero);
-            tr.appendChild(tdPessoas);
-            tr.appendChild(tdTipo);
-            tr.appendChild(tdStatus);
-            tr.appendChild(tdCriado);
-
-            tbodyFila.appendChild(tr);
-          });
-        }
-
-        // Atualiza últimas chamadas (apenas visual, sem ações ainda)
-        listaChamadasEl.innerHTML = "";
-        if (!ultCham.length) {
-          const li = document.createElement("li");
-          li.className = "small";
-          li.textContent = "Nenhuma chamada registrada ainda.";
-          listaChamadasEl.appendChild(li);
-        } else {
-          ultCham.forEach((c) => {
-            const li = document.createElement("li");
-            li.className = "small";
-            li.textContent =
-              formatHora(c.chamado_em) +
-              " – Senha " +
-              (c.numero || "?") +
-              (c.mesa_atribuida ? " (mesa " + c.mesa_atribuida + ")" : "");
-            listaChamadasEl.appendChild(li);
-          });
-        }
-
-        // Atualiza texto de "última atualização"
-        const agora = new Date();
-        ultimaAtualizacaoEl.textContent = agora.toLocaleTimeString("pt-BR", {
+      function formatHora(iso) {
+        if (!iso) return "-";
+        var d = new Date(iso);
+        return d.toLocaleTimeString("pt-BR", {
           hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
+          minute: "2-digit"
         });
-      } catch (erro) {
-        console.error(erro);
-        erroFilaEl.textContent =
-          "Erro ao consultar a API da fila. Tente novamente em alguns instantes.";
-        erroFilaEl.style.display = "block";
       }
-    }
 
-    // ------------------ MESAS LIVRES ------------------
-    // OBS: Aqui estou considerando que ainda não temos endpoint
-    // dedicado para mesas livres. Por enquanto, mantemos somente
-    // no front-end para testes visuais.
-    function registrarMesaLivreLocal(lugares, obs) {
-      estadoFront.mesasLivres.push({
-        id: Date.now(),
-        lugares,
-        obs: obs || "",
-        criado_em: new Date().toISOString(),
+      function carregarFila() {
+        erroFilaEl.style.display = "none";
+        erroFilaEl.textContent = "";
+
+        fetch(API_BASE + "/fila/" + UBS_SLUG)
+          .then(function (resp) {
+            if (!resp.ok) {
+              throw new Error("Falha ao consultar a API: " + resp.status);
+            }
+            return resp.json();
+          })
+          .then(function (data) {
+            var fila = Array.isArray(data.fila) ? data.fila : [];
+            var stats = data.stats || {
+              total: 0,
+              aguardando: 0,
+              atendidas: 0,
+              ausentes: 0
+            };
+            var ultCham = Array.isArray(data.ultimas_chamadas)
+              ? data.ultimas_chamadas
+              : [];
+
+            // Stats
+            statsEl.innerHTML = "";
+            var li1 = document.createElement("li");
+            li1.innerHTML = "<span>Total:</span> <strong>" + stats.total + "</strong>";
+            var li2 = document.createElement("li");
+            li2.innerHTML = "<span>Aguardando:</span> <strong>" + stats.aguardando + "</strong>";
+            var li3 = document.createElement("li");
+            li3.innerHTML = "<span>Atendidas:</span> <strong>" + stats.atendidas + "</strong>";
+            var li4 = document.createElement("li");
+            li4.innerHTML = "<span>Ausentes:</span> <strong>" + stats.ausentes + "</strong>";
+            statsEl.appendChild(li1);
+            statsEl.appendChild(li2);
+            statsEl.appendChild(li3);
+            statsEl.appendChild(li4);
+
+            // Tabela
+            tbodyFila.innerHTML = "";
+            if (!fila.length) {
+              var tr = document.createElement("tr");
+              var td = document.createElement("td");
+              td.colSpan = 6;
+              td.textContent = "Nenhuma senha na fila no momento.";
+              tr.appendChild(td);
+              tbodyFila.appendChild(tr);
+            } else {
+              fila.forEach(function (item, idx) {
+                var tr = document.createElement("tr");
+
+                var tdIdx = document.createElement("td");
+                tdIdx.textContent = String(idx + 1);
+
+                var tdNum = document.createElement("td");
+                tdNum.innerHTML = "<strong>" + (item.numero || "-") + "</strong>";
+
+                var tdPessoas = document.createElement("td");
+                tdPessoas.textContent =
+                  item.qtd_pessoas != null ? String(item.qtd_pessoas) : "-";
+
+                var tdTipo = document.createElement("td");
+                var spanTipo = document.createElement("span");
+                spanTipo.className = "badge";
+                spanTipo.textContent = item.tipo_senha || "mesa";
+                tdTipo.appendChild(spanTipo);
+
+                var tdStatus = document.createElement("td");
+                tdStatus.textContent = item.status || "aguardando";
+
+                var tdCriado = document.createElement("td");
+                tdCriado.textContent = formatHora(item.criado_em);
+
+                tr.appendChild(tdIdx);
+                tr.appendChild(tdNum);
+                tr.appendChild(tdPessoas);
+                tr.appendChild(tdTipo);
+                tr.appendChild(tdStatus);
+                tr.appendChild(tdCriado);
+
+                tbodyFila.appendChild(tr);
+              });
+            }
+
+            // Últimas chamadas (apenas exibe)
+            listaChamadasEl.innerHTML = "";
+            if (!ultCham.length) {
+              var li = document.createElement("li");
+              li.className = "small";
+              li.textContent = "Nenhuma chamada registrada ainda.";
+              listaChamadasEl.appendChild(li);
+            } else {
+              ultCham.forEach(function (c) {
+                var li = document.createElement("li");
+                li.className = "small";
+                li.textContent =
+                  formatHora(c.chamado_em) +
+                  " – Senha " +
+                  (c.numero || "?") +
+                  (c.mesa_atribuida ? " (mesa " + c.mesa_atribuida + ")" : "");
+                listaChamadasEl.appendChild(li);
+              });
+            }
+
+            // Atualiza relógio
+            var agora = new Date();
+            ultimaAtualizacaoEl.textContent = agora.toLocaleTimeString("pt-BR", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit"
+            });
+          })
+          .catch(function (err) {
+            console.error(err);
+            erroFilaEl.textContent =
+              "Erro ao consultar a API da fila. Tente novamente em alguns instantes.";
+            erroFilaEl.style.display = "block";
+          });
+      }
+
+      function renderizarMesasLivres() {
+        var lista = estadoFront.mesasLivres;
+        if (!lista.length) {
+          listaMesasLivresEl.textContent = "Nenhuma mesa livre registrada.";
+          return;
+        }
+
+        var ul = document.createElement("ul");
+        ul.className = "calls-list";
+
+        lista.forEach(function (m) {
+          var li = document.createElement("li");
+          li.className = "small";
+          li.textContent =
+            (m.lugares || "?") +
+            " lugares – " +
+            (m.obs || "sem observação") +
+            " (" +
+            formatHora(m.criado_em) +
+            ")";
+          ul.appendChild(li);
+        });
+
+        listaMesasLivresEl.innerHTML = "";
+        listaMesasLivresEl.appendChild(ul);
+      }
+
+      function registrarMesaLivreLocal(lugares, obs) {
+        estadoFront.mesasLivres.push({
+          id: Date.now(),
+          lugares: lugares,
+          obs: obs || "",
+          criado_em: new Date().toISOString()
+        });
+        renderizarMesasLivres();
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Carrega fila ao abrir
+        carregarFila();
+
+        // Botão de atualizar
+        if (btnRecarregar) {
+          btnRecarregar.addEventListener("click", function () {
+            carregarFila();
+          });
+        }
+
+        // Formulário de mesa livre (somente front, sem API ainda)
+        if (formMesaLivre) {
+          formMesaLivre.addEventListener("submit", function (ev) {
+            ev.preventDefault();
+            var inputLugares = document.getElementById("lugares");
+            var inputObs = document.getElementById("obs");
+            var n = parseInt(inputLugares.value, 10);
+
+            if (!n || n <= 0) {
+              alert("Informe a quantidade de lugares.");
+              return;
+            }
+
+            registrarMesaLivreLocal(n, (inputObs.value || "").trim());
+            formMesaLivre.reset();
+            inputLugares.focus();
+          });
+        }
       });
-      renderizarMesasLivres();
-    }
-
-    function renderizarMesasLivres() {
-      const lista = estadoFront.mesasLivres;
-      if (!lista.length) {
-        listaMesasLivresEl.textContent = "Nenhuma mesa livre registrada.";
-        return;
-      }
-
-      const ul = document.createElement("ul");
-      ul.className = "calls-list";
-
-      lista.forEach((m) => {
-        const li = document.createElement("li");
-        li.className = "small";
-        li.textContent =
-          (m.lugares || "?") +
-          " lugares – " +
-          (m.obs || "sem observação") +
-          " (" +
-          formatHora(m.criado_em) +
-          ")";
-        ul.appendChild(li);
-      });
-
-      listaMesasLivresEl.innerHTML = "";
-      listaMesasLivresEl.appendChild(ul);
-    }
-
-    formMesaLivre.addEventListener("submit", (ev) => {
-      ev.preventDefault();
-      const lugares = parseInt(formMesaLivre.lugares.value, 10);
-      const obs = formMesaLivre.obs.value.trim();
-
-      if (!lugares || lugares <= 0) {
-        alert("Informe a quantidade de lugares.");
-        return;
-      }
-
-      registrarMesaLivreLocal(lugares, obs);
-      formMesaLivre.reset();
-      formMesaLivre.lugares.focus();
-    });
-
-    // ------------------ INICIALIZAÇÃO ------------------
-    btnRecarregar.addEventListener("click", () => {
-      carregarFila();
-    });
-
-    // Carrega dados ao abrir
-    carregarFila();
-
-    // IMPORTANTE:
-    // Auto-refresh desativado para não atrapalhar a interação
-    // (antes havia: setInterval(carregarFila, 5000); )
+    })();
   </script>
 </body>
 </html>
